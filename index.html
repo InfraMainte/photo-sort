@@ -101,12 +101,41 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .gh .gno{font-size:15px;font-weight:700;color:var(--sub);font-variant-numeric:tabular-nums}
 .tabs{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}
 .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--sub)}
-.pv{border:1px solid var(--line);border-radius:10px;background:#f7faf8;padding:10px 12px;font-size:14px;line-height:1.7;max-height:240px;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
+.pv{border:1px solid var(--line);border-radius:10px;background:#f7faf8;padding:10px 12px;font-size:14px;line-height:1.7;max-height:170px;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
 .pv .pp{font-weight:700}
 .pv .pc{color:var(--sub)}
 .pv .new{color:var(--ok);font-weight:700}
 .hint{font-size:13px;color:var(--sub);line-height:1.6;background:#f7faf8;border-radius:10px;padding:8px 12px;margin:6px 0}
 .hint code{font-family:inherit;background:#e3ece6;border-radius:4px;padding:0 4px}
+/* ===== まとめて入力：フォルダ一括作成ツールに合わせた見た目 ===== */
+#dlgBulk{width:min(900px,96vw)}
+.ttabs{display:flex;gap:4px;margin:4px 0 12px;flex-wrap:wrap}
+.tab-btn{padding:9px 14px;border:1.5px solid #d1d5db;border-radius:6px;background:#fff;font-size:14px;font-weight:600;color:#555}
+.tab-btn.active{background:#1a56db;color:#fff;border-color:#1a56db}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.twrap{max-height:42vh;overflow:auto;border-radius:6px}
+.ftbl{width:100%;border-collapse:collapse;font-size:15px;table-layout:fixed}
+.ftbl th{background:#f8faff;border:1px solid #e2e8f0;padding:8px;text-align:left;font-weight:600;color:#555;white-space:nowrap;position:sticky;top:0;z-index:1}
+.ftbl td{border:1px solid #e2e8f0;padding:0;vertical-align:top}
+.ftbl .c-no{width:40px;text-align:center;color:#9ca3af;font-weight:600;padding-top:10px;font-variant-numeric:tabular-nums}
+.ftbl th.c-no{padding-top:8px}
+.ftbl .c-del{width:44px;text-align:center;vertical-align:middle}
+.th-hint{font-size:11px;color:#9ca3af;font-weight:400;margin-left:6px}
+.l1-input{width:100%;border:none;outline:none;padding:10px 9px;font-size:16px;font-weight:600;background:transparent;font-family:inherit}
+.l1-input:focus,.l2-input:focus{background:#f0f7ff}
+.l2-row{display:flex;align-items:stretch;border-bottom:1px solid #eef1f6}
+.l2-grip{width:12px;flex-shrink:0;background:repeating-linear-gradient(0deg,#dbeafe 0px,#dbeafe 2px,#eff6ff 2px,#eff6ff 6px);border-right:1px solid #e2e8f0}
+.l2-input{flex:1;border:none;outline:none;padding:9px 8px;font-size:16px;background:transparent;font-family:inherit;min-width:0}
+.item-del{width:26px;height:26px;flex-shrink:0;align-self:center;background:#fca5a5;color:#7f1d1d;border:none;border-radius:4px;font-size:13px;margin:0 6px;padding:0}
+.add-btn{display:block;width:100%;background:none;border:none;font-size:13px;color:#6b7280;padding:8px 10px;text-align:left}
+.del-btn{background:#ef4444;color:#fff;border:none;border-radius:4px;width:28px;height:28px;font-size:14px;padding:0}
+.btn-group{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn2{padding:9px 14px;border-radius:6px;font-size:14px;font-weight:600}
+.btn-add{background:#e8f0fe;color:#1a56db;border:1.5px solid #1a56db}
+.btn-add5{background:#e8f0fe;color:#374151;border:1.5px solid #6b7280}
+.btn-clear{background:#fef2f2;color:#ef4444;border:1.5px solid #ef4444}
+.btn-load{background:#fff;color:#374151;border:1.5px solid #d1d5db}
 </style>
 </head>
 <body>
@@ -132,13 +161,34 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 
 <dialog id="dlgBulk"><div class="dlg">
   <h2>リストをまとめて入力</h2>
-  <div class="hint">
-    <b>インデント</b>：調査名の行の下に、工程名を<b>行頭に空白か「・」</b>を付けて書く<br>
-    <b>Excel貼り付け</b>：A列＝調査名、B列＝工程名（A列が空の行は上の調査の続き。B列は「,」で複数可）<br>
-    工程のない行は、それだけで1つの対象になります。
+  <div class="ttabs">
+    <button class="tab-btn active" data-t="tbl">🗂 表で入力</button>
+    <button class="tab-btn" data-t="txt">📋 貼り付け・インデント</button>
   </div>
-  <textarea id="taBulk" placeholder="○○調査&#10;・踏査&#10;・計測&#10;△△調査&#10;・採取&#10;単独の対象"></textarea>
-  <div class="tabs"><button class="tab" id="btnLoadCur">今のリストを読み込む</button><button class="tab" id="btnClearBulk">欄を空にする</button></div>
+  <div class="tab-panel active" id="pTbl">
+    <div class="twrap"><table class="ftbl">
+      <thead><tr><th class="c-no">#</th><th>調査名（親）</th><th>工程名（子）<span class="th-hint">空欄なら親だけの対象</span></th><th class="c-del"></th></tr></thead>
+      <tbody id="tbB"></tbody>
+    </table></div>
+    <div class="btn-group">
+      <button class="btn2 btn-add" id="btnRowAdd">＋ 行を追加</button>
+      <button class="btn2 btn-add5" id="btnRowAdd5">＋ 5行追加</button>
+      <button class="btn2 btn-clear" id="btnRowClear">🗑 クリア</button>
+      <button class="btn2 btn-load" id="btnLoadCur">今のリストを読み込む</button>
+    </div>
+  </div>
+  <div class="tab-panel" id="pTxt">
+    <div class="hint">
+      <b>Excel貼り付け</b>：A列＝調査名、B列＝工程名（A列が空の行は上の調査の続き。B列は「,」で複数可）。見出し行は入れずにコピー<br>
+      <b>インデント</b>：調査名の行の下に、工程名を<b>行頭に空白か「・」</b>を付けて書く<br>
+      工程のない行は、それだけで1つの対象になります。
+    </div>
+    <textarea id="taBulk" placeholder="○○調査&#10;・踏査&#10;・計測&#10;△△調査&#10;・採取&#10;単独の対象"></textarea>
+    <div class="btn-group">
+      <button class="btn2 btn-clear" id="btnClearBulk">🗑 欄を空にする</button>
+      <button class="btn2 btn-add" id="btnTxtToTbl">表に移す</button>
+    </div>
+  </div>
   <p style="margin:8px 0 4px"><b>反映後のイメージ</b>（緑＝新しく増える分。「追加」の場合）</p>
   <div class="pv" id="pvBulk">（入力するとここに表示されます）</div>
   <div class="row">
@@ -524,34 +574,127 @@ async function exportCsv(){
 }
 document.getElementById('btnExport').onclick = exportCsv;
 
-// ===== まとめて入力 =====
-const dlgB = document.getElementById('dlgBulk'), taB = document.getElementById('taBulk'), pvB = document.getElementById('pvBulk');
+// ===== まとめて入力（表／貼り付け・インデント） =====
+const dlgB = document.getElementById('dlgBulk'), taB = document.getElementById('taBulk'), pvB = document.getElementById('pvBulk'), tbB = document.getElementById('tbB');
+let TAB = 'tbl';                                  // 表示中の入力方法
+let TB = [];                                      // 表の中身 [{g:'調査名', kids:['工程',…]}]
+const blankRows = (n)=> Array.from({length:n}, ()=>({g:'', kids:['']}));
+// 今のリストを表の形に
+function listToRows(l){
+  const rows = []; let lastPn = 0;
+  for(const b of [...l].sort((a,b)=> a.pn-b.pn || a.cn-b.cn)){
+    const p = split(b.name);
+    if(b.cn){ if(b.pn!==lastPn) rows.push({g:p.g, kids:[]}); rows[rows.length-1].kids.push(p.s); }
+    else rows.push({g:p.s, kids:[]});
+    lastPn = b.pn;
+  }
+  rows.forEach(r=>{ if(!r.kids.length) r.kids = ['']; });
+  return rows;
+}
+// 表から読み取る（調査名が空の行は、上の調査の続き）
+function parseTable(){
+  const out = [];
+  for(const r of TB){
+    const g = clean(r.g), kids = r.kids.map(clean).filter(Boolean);
+    if(g) out.push({g, kids:[...new Set(kids)]});
+    else if(kids.length && out.length) out[out.length-1].kids = [...new Set([...out[out.length-1].kids, ...kids])];
+  }
+  return out;
+}
+const parsedNow = ()=> TAB==='tbl' ? parseTable() : parseBulk(taB.value);
 function preview(){
-  const parsed = parseBulk(taB.value);
+  const parsed = parsedNow();
   if(!parsed.length){ pvB.textContent = '（入力するとここに表示されます）'; return; }
   const r = mergeBulk(parsed, 'add');
   pvB.innerHTML = treeText(r.list, r.added);
 }
+function renderTable(focus){
+  tbB.innerHTML = '';
+  TB.forEach((r, i)=>{
+    const tr = $(`<tr><td class="c-no">${i+1}</td>
+      <td><input class="l1-input" placeholder="例：○○調査" enterkeyhint="next" value="${esc(r.g)}"></td>
+      <td class="kids"></td>
+      <td class="c-del"><button class="del-btn" aria-label="行を削除">✕</button></td></tr>`);
+    const l1 = tr.querySelector('.l1-input'), kc = tr.querySelector('.kids');
+    l1.oninput = ()=>{ r.g = l1.value; preview(); };
+    l1.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); kc.querySelector('.l2-input')?.focus(); } };
+    r.kids.forEach((k, j)=>{
+      const row = $(`<div class="l2-row"><span class="l2-grip"></span>
+        <input class="l2-input" placeholder="工程名" enterkeyhint="next" value="${esc(k)}">
+        <button class="item-del" aria-label="工程を削除">✕</button></div>`);
+      const inp = row.querySelector('input');
+      inp.oninput = ()=>{ r.kids[j] = inp.value; preview(); };
+      // Enterで次の工程欄へ（最後の欄なら1つ増やす）
+      inp.onkeydown = (e)=>{
+        if(e.key!=='Enter') return; e.preventDefault();
+        if(j===r.kids.length-1){ if(!inp.value.trim()) return; r.kids.push(''); renderTable({i, j:j+1}); }
+        else kc.querySelectorAll('.l2-input')[j+1].focus();
+      };
+      row.querySelector('.item-del').onclick = ()=>{
+        r.kids.splice(j,1); if(!r.kids.length) r.kids = [''];
+        renderTable(); preview();
+      };
+      kc.append(row);
+    });
+    const add = $('<button class="add-btn">＋ 工程を追加</button>');
+    add.onclick = ()=>{ r.kids.push(''); renderTable({i, j:r.kids.length-1}); };
+    kc.append(add);
+    tr.querySelector('.del-btn').onclick = ()=>{
+      if((r.g.trim() || r.kids.some(k=>k.trim())) && !confirm(`${i+1}行目（${r.g.trim()||'調査名なし'}）を表から消しますか？`)) return;
+      TB.splice(i,1); if(!TB.length) TB = blankRows(1);
+      renderTable(); preview();
+    };
+    tbB.append(tr);
+  });
+  if(focus){
+    const tr = tbB.children[focus.i];
+    const el = focus.j===undefined ? tr?.querySelector('.l1-input') : tr?.querySelectorAll('.l2-input')[focus.j];
+    el && el.focus();
+  }
+}
+function setTab(t){
+  TAB = t;
+  document.querySelectorAll('#dlgBulk .tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.t===t));
+  document.getElementById('pTbl').classList.toggle('active', t==='tbl');
+  document.getElementById('pTxt').classList.toggle('active', t==='txt');
+  preview();
+}
+document.querySelectorAll('#dlgBulk .tab-btn').forEach(b=> b.onclick = ()=> setTab(b.dataset.t));
 taB.addEventListener('input', preview);
-function openBulk(){ dlgS.close(); preview(); dlgB.showModal(); }
+function openBulk(){
+  dlgS.close();
+  if(!TB.some(r=> r.g.trim() || r.kids.some(k=>k.trim()))) TB = blankRows(5);
+  renderTable(); preview(); dlgB.showModal();
+}
 document.getElementById('btnOpenBulk').onclick = openBulk;
 document.getElementById('btnBulkClose').onclick = ()=> dlgB.close();
-document.getElementById('btnLoadCur').onclick = ()=>{ taB.value = toIndent(loadList()); preview(); };
+document.getElementById('btnRowAdd').onclick = ()=>{ TB.push(...blankRows(1)); renderTable({i:TB.length-1}); };
+document.getElementById('btnRowAdd5').onclick = ()=>{ const n = TB.length; TB.push(...blankRows(5)); renderTable({i:n}); };
+document.getElementById('btnRowClear').onclick = ()=>{ if(!confirm('表の入力をすべて消しますか？（今のリストは消えません）')) return; TB = blankRows(5); renderTable(); preview(); };
+document.getElementById('btnLoadCur').onclick = ()=>{
+  const l = loadList(); if(!l.length){ alert('今のリストは空です。'); return; }
+  TB = listToRows(l); taB.value = toIndent(l); renderTable(); preview();
+};
 document.getElementById('btnClearBulk').onclick = ()=>{ taB.value = ''; preview(); };
+document.getElementById('btnTxtToTbl').onclick = ()=>{
+  const p = parseBulk(taB.value); if(!p.length){ alert('入力がありません。'); return; }
+  TB = p.map(x=>({g:x.g, kids: x.kids.length ? [...x.kids] : ['']})); renderTable(); setTab('tbl');
+};
+function afterApply(){ TB = blankRows(5); taB.value = ''; }
 document.getElementById('btnBulkAdd').onclick = ()=>{
-  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  const parsed = parsedNow(); if(!parsed.length){ alert('入力がありません。'); return; }
   const r = mergeBulk(parsed, 'add');
   if(!r.added.length){ alert('新しく増える対象はありません（すべて既にあります）。'); return; }
-  saveList(r.list); dlgB.close(); render(); toast(`${r.added.length} 件を追加しました`);
+  saveList(r.list); afterApply(); dlgB.close(); render(); toast(`${r.added.length} 件を追加しました`);
 };
 document.getElementById('btnBulkReplace').onclick = ()=>{
-  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  const parsed = parsedNow(); if(!parsed.length){ alert('入力がありません。'); return; }
   if(activeNo()!==null){ alert('実施中の対象があります。先に「終了」してから置き換えてください。'); return; }
   const r = mergeBulk(parsed, 'replace');
   const n = loadList().length, logged = loadLog().length;
   if(n && !confirm(`今のリスト（${n} 件）を、入力した ${r.list.length} 件に置き換えます。\n番号は 01 から振り直します。` +
      (logged ? '\n\n※今日の記録がある場合は、置き換える前に「記録を保存」しておいてください（番号が変わるため）。' : '') + '\n\nよろしいですか？')) return;
-  saveList(r.list); dlgB.close(); render(); toast(`${r.list.length} 件のリストにしました`);
+  saveList(r.list); afterApply(); dlgB.close(); render(); toast(`${r.list.length} 件のリストにしました`);
 };
 
 // ===== 設定 =====
