@@ -5,111 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="踏査写真">
-<meta name="theme-color" content="#1f2a37">
+<meta name="apple-mobile-web-app-title" content="写真仕分け">
+<meta name="theme-color" content="#14532d">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>踏査写真</title>
+<title>写真仕分け</title>
 <style>
 :root{
-  --bg:#eef1f4; --panel:#fff; --ink:#18212b; --sub:#5b6773; --line:#cfd6dd;
-  --head:#1f2a37; --accent:#f2b705; --ok:#2e8b57; --warn:#c0392b; --tile:#f7f9fb;
+  --bg:#eef2ef; --panel:#fff; --ink:#17211b; --sub:#5a6860; --line:#cdd8d1;
+  --head:#14532d; --accent:#f2b705; --run:#c0392b; --ok:#2e8b57; --warn:#c0392b; --grp:#e3ece6;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;}
-body{padding-bottom:env(safe-area-inset-bottom)}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 header{position:sticky;top:0;z-index:5;background:var(--head);color:#fff;
   padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
 header h1{font-size:19px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbtn{background:#334355;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:16px;font-weight:600}
-.hbtn.primary{background:var(--accent);color:#1b1b1b}
-main{padding:16px;max-width:1100px;margin:0 auto}
-.summary{color:var(--sub);font-size:14px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;
-  font-size:15px;color:var(--ink);display:flex;flex-direction:column;gap:6px;min-height:92px}
-.card .no{font-size:22px;font-weight:700}
-.card .nm{color:var(--sub);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dots{display:flex;gap:5px;margin-top:auto}
-.dot{width:14px;height:14px;border-radius:50%;background:#dfe4e9;border:1px solid #c5ccd3}
-.dot.on{background:var(--ok);border-color:var(--ok)}
-.card.done{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
-.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.bar .title{flex:1;font-size:20px;font-weight:700}
-.bar .title small{display:block;font-size:14px;color:var(--sub);font-weight:500}
-.nav{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:16px;color:var(--ink)}
-.nav:disabled{opacity:.35}
-.slots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.slot{background:var(--panel);border:2px dashed #aab4bf;border-radius:14px;position:relative;overflow:hidden;
-  aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;flex-direction:column}
-.slot.wide{grid-column:1/-1;aspect-ratio:auto;height:200px}
-.slot.has{border:2px solid var(--ok);background:#111}
-.slot img{width:100%;height:100%;object-fit:contain;display:block}
-.slot .lbl{position:absolute;top:8px;left:8px;background:var(--head);color:#fff;font-weight:700;
-  font-size:16px;padding:5px 11px;border-radius:8px;z-index:2}
-.slot .empty{font-size:17px;color:var(--sub);text-align:center;line-height:1.7;pointer-events:none}
-.slot .empty b{display:block;font-size:40px;color:#8a96a3;line-height:1}
-.slot .broken{color:#fff;font-size:15px;text-align:center;line-height:1.7;padding:0 16px}
-.slot .tools{position:absolute;right:8px;bottom:8px;display:flex;gap:8px;z-index:2}
-.tbtn{border:0;border-radius:10px;padding:11px 15px;font-size:15px;font-weight:600;background:rgba(255,255,255,.92);color:var(--ink)}
-.tbtn.del{color:var(--warn)}
-.slot .hit{position:absolute;inset:0;background:transparent;border:0;width:100%}
-.sec{margin:22px 0 10px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
-.sec small{font-size:13px;color:var(--sub);font-weight:500}
-.slot.add{border-style:dashed;background:var(--tile)}
-.slot .memo{position:absolute;left:8px;right:8px;bottom:62px;color:#fff;font-size:15px;font-weight:600;
-  text-shadow:0 1px 3px #000;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.editname{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
-.editname small::after{content:"　✎ 編集";color:#2b6cb0;font-weight:600}
-.card.addcard{align-items:center;justify-content:center;border-style:dashed;color:var(--sub);font-weight:600}
-.card .ex{font-size:13px;color:var(--sub);margin-left:4px}
-.busy{position:absolute;inset:0;background:rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;font-weight:600;z-index:3}
-dialog{border:0;border-radius:16px;padding:0;width:min(640px,94vw);max-height:90vh}
-dialog::backdrop{background:rgba(0,0,0,.45)}
-.dlg{padding:20px}
-.dlg h2{margin:0 0 6px;font-size:19px}
-.dlg p{color:var(--sub);font-size:14px;margin:6px 0 10px;line-height:1.6}
-textarea{width:100%;height:220px;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit}
-.row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
-.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;color:var(--ink)}
-.btn.primary{background:var(--head);color:#fff;border-color:var(--head)}
-.btn.danger{color:var(--warn);border-color:#e3b2ac}
-hr{border:0;border-top:1px solid var(--line);margin:18px 0}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);
-  background:#18212b;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
-.toast.show{opacity:1}
-.hbtn.proj{background:#fff;color:var(--head);max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.plist{display:flex;flex-direction:column;gap:8px;margin:10px 0}
-.pitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;font-size:16px;text-align:left;color:var(--ink)}
-.pitem.cur{border:2px solid var(--head);background:#f4f7fa}
-.pitem .pn{flex:1;font-weight:700}
-.pitem .pc{color:var(--sub);font-size:14px}
-.pitem .mk{width:22px;height:22px;border-radius:50%;border:2px solid #aab4bf;flex:none}
-.pitem.cur .mk{border:7px solid var(--head)}
-.startbar{display:flex;align-items:center;gap:12px;margin:-4px 0 14px;flex-wrap:wrap}
-.startbtn{border:0;border-radius:12px;padding:13px 18px;font-size:17px;font-weight:700;background:var(--ok);color:#fff}
-.startbtn.on{background:#c0392b;color:#fff}
-.startinfo{color:var(--sub);font-size:14px;line-height:1.5}
-.slot svg.ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.tbtn.arw{color:#c0392b}
-#arrowEd{position:fixed;inset:0;z-index:50;background:#111;display:none;flex-direction:column;
-  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-#arrowEd.show{display:flex}
-#arrowEd .top,#arrowEd .bot{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#1f2a37;color:#fff;flex-wrap:wrap}
-#arrowEd .top .ttl{flex:1;font-weight:700;font-size:17px}
-#arrowEd .stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}
-#arrowEd .stage img,#arrowEd .stage svg{position:absolute;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#arrowEd .stage svg{touch-action:none}
-.eb{border:0;border-radius:10px;padding:11px 14px;font-size:16px;font-weight:700;background:#334355;color:#fff}
-.eb.pri{background:var(--accent);color:#1b1b1b}
-.eb.red{background:#c0392b}
-.eb:disabled{opacity:.35}
-.sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;padding:0}
-.sw.on{outline:3px solid var(--accent);outline-offset:2px}
-.wlab{font-size:14px;color:#cdd5dd}
-#arrowEd input[type=range]{width:160px;height:30px}
-.hint{font-size:13px;color:#cdd5dd;width:100%}
+header h1 small{font-size:13px;font-weight:500;opacity:.8;margin-left:8px}
+.hbtn{background:#21703f;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:16px;font-weight:600}
+.hbtn.on{background:var(--accent);color:#1b1b1b}
+main{padding:14px 16px;max-width:900px;margin:0 auto}
 .worker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
   border-radius:12px;padding:10px 14px;margin:0 0 12px}
 .worker b{font-size:16px}
@@ -118,280 +34,339 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .worker input{width:11em}
 .worker.none{border:2px solid var(--warn)}
 .worker .wmsg{color:var(--warn);font-size:14px;font-weight:600}
-@media (max-width:560px){.slots{grid-template-columns:1fr}}
+.now{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-radius:14px;padding:14px 16px;margin:0 0 14px;
+  background:#fff;border:1px solid var(--line)}
+.now.run{background:#fdecea;border:2px solid var(--run)}
+.now.edit{background:#fff8e1;border:2px solid var(--accent)}
+.now .txt{flex:1;min-width:200px;font-size:15px;color:var(--sub);line-height:1.5}
+.now.run .txt,.now.edit .txt{color:var(--ink)}
+.now .txt b{font-size:19px;color:var(--ink)}
+.bigbtn{border:0;border-radius:12px;padding:15px 20px;font-size:18px;font-weight:700;color:#fff;background:var(--run)}
+.bigbtn.done{background:var(--head)}
+.list{display:flex;flex-direction:column;gap:8px}
+.grp{border:1px solid var(--line);border-radius:14px;background:var(--grp);overflow:hidden}
+.grp.run{border:2px solid var(--run)}
+.gh{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.gh .arw{font-size:14px;color:var(--sub);width:1em;transition:transform .15s}
+.grp.fold .gh .arw{transform:rotate(-90deg)}
+.gh .gn{flex:1;min-width:0;font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh .gc{font-size:13px;color:var(--sub);white-space:nowrap}
+.gh .gc b{color:var(--run)}
+.gbody{display:flex;flex-direction:column;gap:6px;padding:0 10px 10px}
+.grp.fold .gbody{display:none}
+.item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.item.run{border:2px solid var(--run);background:#fff7f6}
+.item.done{border-color:#9cc9ad}
+.item .no{font-size:15px;font-weight:700;color:var(--sub);min-width:2.8em}
+.item .body{flex:1;min-width:0}
+.item .nm{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .nm.empty{color:var(--sub);font-weight:500}
+.item .sp{font-size:13px;color:var(--sub);margin-top:3px;line-height:1.4}
+.item.done .sp{color:var(--ok);font-weight:600}
+.sbtn{border:0;border-radius:12px;padding:14px 18px;font-size:17px;font-weight:700;color:#fff;background:var(--ok);min-width:6.5em}
+.sbtn.on{background:var(--run)}
+.ebtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 13px;font-size:15px;font-weight:600;color:var(--ink);white-space:nowrap}
+.ebtn.del{color:var(--warn);border-color:#e3b2ac}
+.addbtn{border:2px dashed #9fb3a6;background:transparent;border-radius:12px;padding:12px;font-size:16px;font-weight:600;color:var(--sub);width:100%}
+.addbtn.big{padding:15px;margin-top:4px;background:#fff}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:18px;color:var(--sub);line-height:1.7;font-size:15px}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}
+.fbtn{flex:1;max-width:260px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 8px;font-size:16px;font-weight:700;color:var(--ink)}
+.fbtn.pri{background:var(--accent);border-color:var(--accent);color:#1b1b1b}
+.summary{color:var(--sub);font-size:14px;margin:0 0 10px}
+dialog{border:0;border-radius:16px;padding:0;width:min(640px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:20px}
+.dlg h2{margin:0 0 6px;font-size:19px}
+.dlg p{color:var(--sub);font-size:14px;margin:6px 0 10px;line-height:1.6}
+.dlg input[type=text]{width:100%;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit}
+textarea{width:100%;height:200px;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;color:var(--ink)}
+.btn.primary{background:var(--head);color:#fff;border-color:var(--head)}
+.btn.danger{color:var(--warn);border-color:#e3b2ac}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+#clock{position:fixed;inset:0;z-index:50;background:#000;color:#fff;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+#clock.show{display:flex}
+#clock .d{font-size:clamp(28px,6vw,54px);font-weight:600;letter-spacing:.04em}
+#clock .t{font-size:clamp(70px,19vw,200px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1}
+#clock .h{font-size:16px;color:#bbb;line-height:1.7;max-width:640px}
+#clock button{margin-top:10px;border:0;border-radius:12px;padding:14px 26px;font-size:18px;font-weight:700;background:#333;color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:#17211b;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.item .no{font-variant-numeric:tabular-nums}
+.gh .gno{font-size:15px;font-weight:700;color:var(--sub);font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--sub)}
+.pv{border:1px solid var(--line);border-radius:10px;background:#f7faf8;padding:10px 12px;font-size:14px;line-height:1.7;max-height:240px;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
+.pv .pp{font-weight:700}
+.pv .pc{color:var(--sub)}
+.pv .new{color:var(--ok);font-weight:700}
+.hint{font-size:13px;color:var(--sub);line-height:1.6;background:#f7faf8;border-radius:10px;padding:8px 12px;margin:6px 0}
+.hint code{font-family:inherit;background:#e3ece6;border-radius:4px;padding:0 4px}
 </style>
 </head>
 <body>
 <header>
-  <h1 id="htitle">踏査写真</h1>
-  <button class="hbtn proj" id="btnProj">業務：<span id="projName"></span> ▾</button>
+  <h1>写真仕分け<small id="gname"></small></h1>
+  <button class="hbtn" id="btnEdit">編集</button>
   <button class="hbtn" id="btnSettings">設定</button>
-  <button class="hbtn primary" id="btnExport">ZIP保存</button>
 </header>
 <main id="app"></main>
-<input type="file" id="picker" accept="image/*" hidden>
+<div class="foot">
+  <button class="fbtn" id="btnClock">時計を表示</button>
+  <button class="fbtn" id="btnUndo">直前を取消</button>
+  <button class="fbtn pri" id="btnExport">記録を保存</button>
+</div>
+
+<div id="clock">
+  <div class="d" id="ckD"></div>
+  <div class="t" id="ckT"></div>
+  <div class="h">デジカメでこの画面を1枚撮影してください（その日の最初に1回）。<br>
+    PCで仕分けるとき、この写真でカメラの時計のずれを補正できます。<br>iPadのカメラで撮る場合は不要です。</div>
+  <button id="ckClose">閉じる</button>
+</div>
+
+<dialog id="dlgBulk"><div class="dlg">
+  <h2>リストをまとめて入力</h2>
+  <div class="hint">
+    <b>インデント</b>：調査名の行の下に、工程名を<b>行頭に空白か「・」</b>を付けて書く<br>
+    <b>Excel貼り付け</b>：A列＝調査名、B列＝工程名（A列が空の行は上の調査の続き。B列は「,」で複数可）<br>
+    工程のない行は、それだけで1つの対象になります。
+  </div>
+  <textarea id="taBulk" placeholder="○○調査&#10;・踏査&#10;・計測&#10;△△調査&#10;・採取&#10;単独の対象"></textarea>
+  <div class="tabs"><button class="tab" id="btnLoadCur">今のリストを読み込む</button><button class="tab" id="btnClearBulk">欄を空にする</button></div>
+  <p style="margin:8px 0 4px"><b>反映後のイメージ</b>（緑＝新しく増える分。「追加」の場合）</p>
+  <div class="pv" id="pvBulk">（入力するとここに表示されます）</div>
+  <div class="row">
+    <button class="btn" id="btnBulkClose">閉じる</button>
+    <button class="btn" id="btnBulkAdd">追加</button>
+    <button class="btn primary" id="btnBulkReplace">置き換え</button>
+  </div>
+</div></dialog>
 
 <dialog id="dlgSettings"><div class="dlg">
-  <h2>橋梁リスト</h2>
-  <p>Excelの「点検橋梁一覧表」で <b>No列と橋梁名列（A〜B列）</b> をコピーして貼り付けてください。<br>
-     1行に「No（タブ／カンマ／空白）橋梁名」。空のままなら No.1〜35 を表示します。<br>
-     1橋ずつ入れる場合は、一覧の「＋ 橋を追加」か、各橋の画面で橋梁名をタップしてください。</p>
-  <textarea id="taList" placeholder="1	156号橋&#10;2	○○橋"></textarea>
-  <div class="row">
-    <button class="btn" id="btnCloseSet">閉じる</button>
-    <button class="btn primary" id="btnSaveList">リストを保存</button>
-  </div>
+  <h2>業務名</h2>
+  <p>保存する記録のファイル名に入ります。</p>
+  <input type="text" id="inName" placeholder="例：R7○○調査">
+  <div class="row"><button class="btn primary" id="btnSaveName">業務名を保存</button></div>
   <hr>
-  <h2>写真データ（表示中の業務）</h2>
-  <p id="storeInfo">—</p>
+  <h2>対象リスト</h2>
+  <p>調査（親）と工程（子）のリストを、インデントかExcelの貼り付けでまとめて作れます。<br>1件ずつの追加・削除は、一覧の「＋」と右上の「編集」で。</p>
+  <div class="row" style="justify-content:flex-start;margin-top:4px"><button class="btn primary" id="btnOpenBulk">リストをまとめて入力</button></div>
+  <hr>
+  <h2>開始・終了の記録</h2>
+  <p id="logInfo">—</p>
   <div class="row">
-    <button class="btn danger" id="btnClearAll">この業務の写真をすべて削除</button>
+    <button class="btn danger" id="btnClearLog">記録をすべて消去</button>
+    <button class="btn" id="btnCloseSet">閉じる</button>
   </div>
 </div></dialog>
-
-<dialog id="dlgProj"><div class="dlg">
-  <h2>業務の切り替え</h2>
-  <p>業務ごとに橋梁リスト・写真・ZIPが分かれます。タップした業務に切り替わります。</p>
-  <div class="plist" id="plist"></div>
-  <div class="row">
-    <button class="btn" id="btnProjAdd">＋ 業務を追加</button>
-    <button class="btn" id="btnProjRename">表示中の業務名を変更</button>
-  </div>
-  <div class="row">
-    <button class="btn danger" id="btnProjDel">表示中の業務を削除</button>
-    <button class="btn primary" id="btnProjClose">閉じる</button>
-  </div>
-</div></dialog>
-
-<div id="arrowEd">
-  <div class="top">
-    <span class="ttl" id="aeTitle">矢印</span>
-    <button class="eb" id="aeCancel">キャンセル</button>
-    <button class="eb pri" id="aeDone">完了</button>
-  </div>
-  <div class="stage" id="aeStage"><img id="aeImg" alt=""><svg id="aeSvg"></svg></div>
-  <div class="bot">
-    <button class="eb" id="aeAdd">＋ 矢印</button>
-    <button class="eb" id="aeFlip">向きを反転</button>
-    <button class="eb red" id="aeDel">削除</button>
-    <span class="wlab">太さ</span><input type="range" id="aeW" min="3" max="40" step="1" value="10">
-    <span id="aeSw"></span>
-    <div class="hint">写真の上をなぞると矢印を追加。矢印をタップで選択 → 両端の○で向き・長さ、中央をドラッグで移動。</div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 'use strict';
 // ===== 設定 =====
-// k はZIP内ファイル名（Excelマクロの検索キー）。表示順＝踏査表の枠
-const SLOTS = [
-  {k:'kyoureki',  n:'橋歴板', wide:true},
-  {k:'kyoumen',   n:'橋面'},
-  {k:'sokumen',   n:'側面'},
-  {k:'ketashita', n:'桁下'},
-  {k:'kabukou',   n:'下部工'},
-];
-const MAX_EDGE = 1280;      // 縮小後の長辺(px)：1280×960＝約120万画素（CALSの目安程度）
-const JPEG_Q   = 0.80;
-const DEFAULT_COUNT = 35;
-const LS_PROJ = 'tousa.projects', LS_CUR = 'tousa.current';
-let PID = '', LS_LIST = '', LS_EXPORT = '', LS_LOG = '';   // 表示中の業務ID と その業務用の保存キー
-// 作業者（iPadを持ち出す人）。プルダウンの候補以外は「その他」で入力。iPad内に保存し、いつでも変更できる
-const WORKERS = ['青木','髙原','山口','赤池'];
-const LS_WORKER = 'tousa.worker';
-const getWorker = ()=> (localStorage.getItem(LS_WORKER)||'').trim();
-function setWorker(v){ v = (v||'').trim(); v ? localStorage.setItem(LS_WORKER, v) : localStorage.removeItem(LS_WORKER); }
+// 保存キーは踏査写真アプリ（tousa.*）と別名にする
+const LS = { name:'psort.name', list:'psort.list', log:'psort.log', worker:'psort.worker', exp:'psort.lastExport', fold:'psort.fold' };
+const WORKERS = ['青木','髙原','山口','赤池'];   // 候補以外は「その他（入力）」
+const PAD = 2;                                  // 番号の桁数（01／01-01）。1にすると 1／1-1
+let EDIT = false;                               // 編集モード（名前変更・削除）
 
-// ===== IndexedDB =====
-let dbp;
-function db(){
-  if(!dbp) dbp = new Promise((res,rej)=>{
-    const r = indexedDB.open('tousa-photo',1);
-    r.onupgradeneeded = ()=> r.result.createObjectStore('photos');
-    r.onsuccess = ()=> res(r.result);
-    r.onerror = ()=> rej(r.error);
-  });
-  return dbp;
-}
-async function tx(mode, fn){
-  const d = await db();
-  return new Promise((res,rej)=>{
-    const t = d.transaction('photos', mode), s = t.objectStore('photos');
-    const out = fn(s);
-    t.oncomplete = ()=> res(out && 'result' in out ? out.result : undefined);
-    t.onerror = ()=> rej(t.error); t.onabort = ()=> rej(t.error || new Error('保存できませんでした'));
-  });
-}
-// 写真のキーは「業務ID|No|部位」。画面側では業務IDを除いた「No|部位」で扱う
-const fk = (k)=> PID + '|' + k;
-const range = (pid)=> IDBKeyRange.bound(pid + '|', pid + '|￿');
-const putPhoto = (key,blob)=> tx('readwrite', s=> s.put({blob, ts:Date.now()}, fk(key)));
-const putRec   = (key,val)=> tx('readwrite', s=> s.put(val, fk(key)));
-const delPhoto = (key)=> tx('readwrite', s=> s.delete(fk(key)));
-const getPhoto = (key)=> tx('readonly', s=> s.get(fk(key)));
-const allKeys  = async ()=> (await tx('readonly', s=> s.getAllKeys(range(PID)))).map(k=> String(k).slice(PID.length+1));
-const clearAll = ()=> tx('readwrite', s=> s.delete(range(PID)));
-const keyOf = (no,k)=> no + '|' + k;
-const EXTRA = 'sonota';
-const getAll = ()=> tx('readonly', s=> s.getAll());
-// iPad（Safari）対策：IndexedDBから読んだ写真をそのまま同じキーへ書き戻すと、
-// 上書きの際に写真の実体が消えて「？」表示になることがある。書き戻す前に必ずメモリ上へ複製する
-async function freshBlob(b){ return new Blob([await b.arrayBuffer()], {type: b.type || 'image/jpeg'}); }
-async function rewriteRec(key, rec, changes){
-  const {key:_k, ...val} = rec;
-  Object.assign(val, changes);
-  val.blob = await freshBlob(rec.blob);
-  await putRec(key, val);
-}
-
-// ===== 橋梁リスト =====
+// ===== 保存 =====
+// リストの1件：{no:内部番号（記録のキー・使い回さない）, name:'調査名／工程名' または '名前', pn:調査の番号, cn:工程の番号（工程なしは0）}
+const ls = {
+  get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)||'null'); return v ?? d; }catch(e){ return d; } },
+  set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+};
+const gName = ()=> (localStorage.getItem(LS.name)||'').trim();
+const getWorker = ()=> (localStorage.getItem(LS.worker)||'').trim();
+function setWorker(v){ v=(v||'').trim(); v ? localStorage.setItem(LS.worker,v) : localStorage.removeItem(LS.worker); }
 function loadList(){
-  try{ const v = JSON.parse(localStorage.getItem(LS_LIST)||'null'); if(Array.isArray(v) && v.length) return v; }catch(e){}
-  return Array.from({length:DEFAULT_COUNT},(_,i)=>({no:i+1,name:''}));
-}
-function saveList(l){ l.sort((a,b)=>a.no-b.no); localStorage.setItem(LS_LIST, JSON.stringify(l)); }
-function editBridge(no){
-  const l = loadList(); let b = l.find(x=>x.no===no);
-  const v = prompt(`No.${no} の橋梁名を入力`, b ? b.name : '');
-  if(v===null) return false;
-  if(!b){ b={no,name:''}; l.push(b); }
-  b.name = v.trim(); saveList(l); return true;
-}
-function addBridge(){
-  const l = loadList(), next = l.reduce((m,b)=>Math.max(m,b.no),0)+1;
-  const n = prompt('追加する橋のNo', String(next)); if(n===null) return;
-  const no = parseInt(n,10); if(!(no>0)){ alert('Noは数字で入力してください。'); return; }
-  if(l.some(b=>b.no===no)){ alert(`No.${no} は既にあります。`); return; }
-  const name = prompt(`No.${no} の橋梁名`, ''); if(name===null) return;
-  l.push({no, name:name.trim()}); saveList(l); location.hash = '#b/' + no;
-}
-function parseList(text){
-  const out=[]; let seq=0;
-  for(const raw of text.split(/\r?\n/)){
-    const line = raw.trim(); if(!line) continue;
-    const m = line.match(/^(\d{1,3})[\t,，\s　]+(.*)$/);
-    if(m){ out.push({no:+m[1], name:m[2].trim()}); seq=+m[1]; }
-    else if(/^\d{1,3}$/.test(line)){ out.push({no:+line,name:''}); seq=+line; }
-    else if(!/^(No|例)/i.test(line)){ seq++; out.push({no:seq,name:line}); }
+  let l = ls.get(LS.list, []); if(!Array.isArray(l)) l = [];
+  // 旧版（番号なし）のリストに、今の並びで番号を付ける
+  if(l.some(b=>!(b.pn>0))){
+    l.sort((a,b)=>a.no-b.no);
+    let pn = Math.max(0, ...l.filter(b=>b.pn>0).map(b=>b.pn));
+    const gp = new Map(l.filter(b=>b.pn>0).map(b=>[split(b.name).g, b.pn]));
+    for(const b of l){
+      if(b.pn>0) continue;
+      const p = split(b.name);
+      if(p.g){
+        if(!gp.has(p.g)) gp.set(p.g, ++pn);
+        b.pn = gp.get(p.g); b.cn = Math.max(0, ...l.filter(x=>x!==b && x.pn===b.pn).map(x=>x.cn||0)) + 1;
+      }else{ b.pn = ++pn; b.cn = 0; }
+    }
+    saveList(l);
   }
-  const seen=new Set(); return out.filter(b=> b.no>0 && !seen.has(b.no) && seen.add(b.no));
+  return l;
 }
+function saveList(l){ l.sort((a,b)=> a.pn-b.pn || a.cn-b.cn || a.no-b.no); ls.set(LS.list, l); }
+const loadLog = ()=>{ const v = ls.get(LS.log, []); return Array.isArray(v) ? v : []; };
+const saveLog = (l)=> ls.set(LS.log, l);
+const folded = ()=> new Set(ls.get(LS.fold, []));
+function setFold(g, on){ const s = folded(); on ? s.add(g) : s.delete(g); ls.set(LS.fold, [...s]); }
+function activeNo(){ const l = loadLog(), x = l[l.length-1]; return x && x.k==='s' ? x.no : null; }
+// 次の内部番号（リストと記録の両方の最大＋1。削除した対象の番号は使い回さない）
+function nextNo(l){ return Math.max(0, ...(l||loadList()).map(b=>b.no), ...loadLog().map(x=>x.no)) + 1; }
+const hasLog = (no)=> loadLog().some(x=>x.no===no);
 
-// ===== 踏査開始の記録（元写真の仕分け用） =====
-function loadLog(){ try{ const v = JSON.parse(localStorage.getItem(LS_LOG)||'[]'); return Array.isArray(v) ? v : []; }catch(e){ return []; } }
-function addStart(no){ const l = loadLog(); l.push({no, t:Date.now(), w:getWorker()}); localStorage.setItem(LS_LOG, JSON.stringify(l)); }
-function addEnd(no){ const l = loadLog(); l.push({no, t:Date.now(), end:true, w:getWorker()}); localStorage.setItem(LS_LOG, JSON.stringify(l)); }
-// 踏査中の橋（最後の記録が「開始」ならその橋、なければ null）
-function activeNo(){ const l = loadLog(), x = l[l.length-1]; return x && !x.end ? x.no : null; }
-// その橋の踏査時間帯の表示（例：10:05〜10:40、11:30〜踏査中）
-function spans(no){
-  const l = loadLog(), out = []; let cur = null;
-  for(const x of l){
-    if(!x.end && x.no===no){ if(cur) out.push(hm(cur)+'〜'); cur = x.t; }
-    else if(cur){ out.push(hm(cur)+'〜'+hm(x.t)); cur = null; }   // 終了、または別の橋の開始で区切る
+// 「調査名／工程名」を分ける（内部の区切り。画面では入力しない）
+function split(name){
+  const m = String(name||'').match(/^(.+?)\s*[／/]\s*(.+)$/);
+  return m ? {g:m[1].trim(), s:m[2].trim()} : {g:'', s:String(name||'').trim()};
+}
+const join = (g, s)=> g ? `${g}／${s}` : s;
+const disp = (name)=>{ const p = split(name); return p.g ? `${p.g} ＞ ${p.s}` : (p.s || '（名前なし）'); };
+const pad = (n)=> String(n).padStart(PAD,'0');
+const codeOf = (b)=> b ? (b.cn ? `${pad(b.pn)}-${pad(b.cn)}` : pad(b.pn)) : '';
+const clean = (s)=> String(s||'').replace(/[／/]/g,'・').trim();
+const itemOf = (no)=> loadList().find(x=>x.no===no);
+
+// ===== まとめて入力（インデント／Excel貼り付け） =====
+// 戻り値：[{g:'調査名', kids:['工程',…]}]（kidsが空なら、調査名だけの単独の対象）
+function parseBulk(text){
+  const out = []; let cur = null;
+  const names = (s)=> s.split(/[\t,，]/).map(clean).filter(Boolean);
+  for(const raw of String(text).split(/\r?\n/)){
+    if(!raw.trim()) continue;
+    if(/^[\s　]|^[・\-•*＊－]/.test(raw)){                 // 行頭が空白・タブ・「・」→ 工程
+      const ks = names(raw.replace(/^[\s　・\-•*＊－]+/, ''));
+      if(cur) cur.kids.push(...ks); else ks.forEach(k=> out.push({g:k, kids:[]}));
+    }else{                                                  // 調査（タブの右は工程）
+      const cols = raw.split('\t');
+      if(cols.length>1 && /^\s*\d+\s*$/.test(cols[0])) cols.shift();   // ExcelのNo列は無視
+      const g = clean(cols[0].replace(/^\s*\d+[.．)）]\s*/, ''));
+      if(!g){ const ks = names(cols.slice(1).join('\t')); if(cur) cur.kids.push(...ks); continue; }   // No列あり・調査名が空の行
+      cur = {g, kids: names(cols.slice(1).join('\t'))}; out.push(cur);
+    }
   }
-  if(cur) out.push(hm(cur)+'〜踏査中');
+  out.forEach(x=> x.kids = [...new Set(x.kids)]);
   return out;
 }
-const hm = (t)=>{ const d=new Date(t); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
-function fmtDT(t){
-  const d=new Date(t), z=(n)=>String(n).padStart(2,'0');
-  return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
-}
-
-// JPEGのEXIFから撮影日時（DateTimeOriginal）を読む。なければ null
-async function exifTime(file){
-  try{
-    const buf = await file.slice(0, 262144).arrayBuffer(), v = new DataView(buf);
-    if(v.getUint16(0) !== 0xFFD8) return null;
-    let p = 2;
-    while(p + 4 < v.byteLength){
-      const mk = v.getUint16(p), len = v.getUint16(p+2);
-      if(mk === 0xFFE1 && v.getUint32(p+4) === 0x45786966){          // "Exif"
-        const t = p + 10, le = v.getUint16(t) === 0x4949;
-        const u16 = (o)=> v.getUint16(t+o, le), u32 = (o)=> v.getUint32(t+o, le);
-        const str = (o,n)=>{ let r=''; for(let i=0;i<n-1;i++){ const c=v.getUint8(t+o+i); if(!c) break; r+=String.fromCharCode(c);} return r; };
-        const find = (ifd, tag)=>{ const n=u16(ifd); for(let i=0;i<n;i++){ const e=ifd+2+i*12; if(u16(e)===tag) return e; } return -1; };
-        const ifd0 = u32(4); let val = null;
-        const ex = find(ifd0, 0x8769);
-        if(ex >= 0){ const exi = u32(ex+8); for(const tg of [0x9003,0x9004]){ const e=find(exi,tg); if(e>=0){ val=str(u32(e+8),u32(e+4)); break; } } }
-        if(!val){ const e=find(ifd0,0x0132); if(e>=0) val=str(u32(e+8),u32(e+4)); }
-        const m = val && val.match(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
-        return m ? new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime() : null;
+// mode：'add'＝今のリストに追加（同じ調査名には工程を足す）、'replace'＝置き換え
+function mergeBulk(parsed, mode){
+  const l = mode==='replace' ? [] : loadList().map(b=>({...b})), added = [];
+  let no = nextNo(loadList());
+  let pnMax = Math.max(0, ...l.map(b=>b.pn));
+  for(const x of parsed){
+    const grp = l.filter(b=> split(b.name).g===x.g);
+    if(x.kids.length){
+      const pn = grp.length ? grp[0].pn : ++pnMax;
+      let cn = Math.max(0, ...grp.map(b=>b.cn));
+      for(const k of x.kids){
+        if(grp.some(b=> split(b.name).s===k)) continue;
+        const b = {no:no++, name:join(x.g,k), pn, cn:++cn}; l.push(b); added.push(b);
       }
-      if((mk & 0xFF00) !== 0xFF00 || mk === 0xFFDA) break;
-      p += 2 + len;
+    }else{
+      if(l.some(b=> !split(b.name).g && b.name===x.g)) continue;
+      const b = {no:no++, name:x.g, pn:++pnMax, cn:0}; l.push(b); added.push(b);
     }
-  }catch(e){}
-  return null;
-}
-
-// ===== 画像縮小 =====
-async function resize(file){
-  const url = URL.createObjectURL(file);
-  try{
-    const img = new Image(); img.src = url; await img.decode();
-    const w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, MAX_EDGE/Math.max(w,h));
-    const c = document.createElement('canvas'); c.width = Math.round(w*s); c.height = Math.round(h*s);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);   // EXIFの向きはSafariが反映済み
-    return await new Promise((res,rej)=> c.toBlob(b=> b?res(b):rej(new Error('変換失敗')),'image/jpeg',JPEG_Q));
-  } finally { URL.revokeObjectURL(url); }
-}
-
-// ===== ZIP（無圧縮・ASCIIファイル名） =====
-const CRC = (()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
-function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
-function makeZip(files){
-  const enc=new TextEncoder(), parts=[], cen=[]; let off=0, cenSize=0;
-  const d=new Date(), time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),
-        date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
-  for(const f of files){
-    const name=enc.encode(f.name), crc=crc32(f.data), size=f.data.length;
-    const lh=new DataView(new ArrayBuffer(30));
-    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true); lh.setUint16(8,0,true);
-    lh.setUint16(10,time,true); lh.setUint16(12,date,true); lh.setUint32(14,crc,true);
-    lh.setUint32(18,size,true); lh.setUint32(22,size,true); lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
-    parts.push(lh.buffer,name,f.data);
-    const ch=new DataView(new ArrayBuffer(46));
-    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true);
-    ch.setUint16(10,0,true); ch.setUint16(12,time,true); ch.setUint16(14,date,true); ch.setUint32(16,crc,true);
-    ch.setUint32(20,size,true); ch.setUint32(24,size,true); ch.setUint16(28,name.length,true);
-    ch.setUint32(38,0,true); ch.setUint32(42,off,true);
-    cen.push(ch.buffer,name); cenSize+=46+name.length; off+=30+name.length+size;
   }
-  const end=new DataView(new ArrayBuffer(22));
-  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true);
-  end.setUint32(12,cenSize,true); end.setUint32(16,off,true);
-  return new Blob([...parts,...cen,end.buffer],{type:'application/zip'});
+  return {list:l, added};
+}
+function treeText(l, added){
+  const ad = new Set((added||[]).map(b=>b.no)), out = [];
+  const sorted = [...l].sort((a,b)=> a.pn-b.pn || a.cn-b.cn);
+  let lastPn = 0;
+  for(const b of sorted){
+    const p = split(b.name), mk = (s)=> ad.has(b.no) ? `<span class="new">${s}</span>` : s;
+    if(b.cn){
+      if(b.pn!==lastPn) out.push(`<span class="pp">${pad(b.pn)}　${esc(p.g)}</span>`);
+      out.push(`<span class="pc">　　${mk(codeOf(b)+'　'+esc(p.s))}</span>`);
+    }else out.push(`<span class="pp">${mk(pad(b.pn)+'　'+esc(p.s))}</span>`);
+    lastPn = b.pn;
+  }
+  return out.length ? out.join('\n') : '（対象がありません）';
+}
+function toIndent(l){
+  const out = []; let lastPn = 0;
+  for(const b of [...l].sort((a,b)=> a.pn-b.pn || a.cn-b.cn)){
+    const p = split(b.name);
+    if(b.cn){ if(b.pn!==lastPn) out.push(p.g); out.push('・' + p.s); }
+    else out.push(p.s);
+    lastPn = b.pn;
+  }
+  return out.join('\n');
+}
+
+// ===== 時刻 =====
+const z = (n)=>String(n).padStart(2,'0');
+const hm = (t)=>{ const d=new Date(t); return z(d.getHours())+':'+z(d.getMinutes()); };
+function fmtDT(t){ const d=new Date(t); return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; }
+function spans(no, log){
+  const out=[]; let cur=null;
+  for(const x of (log||loadLog())){
+    if(x.k==='s' && x.no===no){ if(cur!==null) out.push(hm(cur)+'〜'); cur=x.t; }
+    else if(cur!==null){ out.push(hm(cur)+'〜'+hm(x.t)); cur=null; }
+  }
+  if(cur!==null) out.push(hm(cur)+'〜実施中');
+  return out;
+}
+
+// ===== 開始・終了 =====
+const nameOf = (no)=>{ const b = itemOf(no); return b ? b.name : ''; };
+function rec(no, k, t){ const b = itemOf(no); return {no, t, k, w:getWorker(), n:b?b.name:'', c:codeOf(b)}; }
+function start(no){
+  if(!getWorker()){ alert('作業者が選ばれていません。\n画面上の「作業者」で選んでから開始してください。'); return; }
+  const l = loadLog(), t = Date.now(), act = activeNo();
+  if(act!==null) l.push(rec(act, 'e', t));      // 別の対象を実施中なら、同じ時刻で終了させる
+  l.push(rec(no, 's', t)); saveLog(l);
+  toast(`開始 ${hm(t)}：${disp(nameOf(no))}`);
+  render();
+}
+function stop(){
+  const act = activeNo(); if(act===null) return;
+  const l = loadLog(), t = Date.now(); l.push(rec(act, 'e', t)); saveLog(l);
+  toast(`終了 ${hm(t)}：${disp(nameOf(act))}`); render();
+}
+
+// ===== 1件ずつの追加・名前変更・削除 =====
+function ask(msg, def){ const v = prompt(msg, def||''); return v===null ? null : clean(v); }
+function addSurvey(){
+  const g = ask('調査名（例：○○調査）'); if(g===null || !g) return;
+  const s = ask(`「${g}」の最初の工程名（例：踏査）\n空欄のままOKなら、工程なしの1つの対象になります`); if(s===null) return;
+  const r = mergeBulk([{g, kids: s ? [s] : []}], 'add');
+  if(!r.added.length){ alert('同じ名前の対象が既にあります。'); return; }
+  saveList(r.list); setFold(g, false); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
+}
+function addProc(g){
+  const s = ask(`「${g}」に追加する工程名`); if(s===null || !s) return;
+  const r = mergeBulk([{g, kids:[s]}], 'add');
+  if(!r.added.length){ alert('同じ名前の工程が既にあります。'); return; }
+  saveList(r.list); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
+}
+function renameItem(no){
+  const l = loadList(), b = l.find(x=>x.no===no); if(!b) return;
+  const p = split(b.name);
+  const v = ask(p.g ? `「${p.g}」の工程名を変更` : '名前を変更', p.s); if(v===null || !v) return;
+  b.name = join(p.g, v); saveList(l); render();
+}
+function renameGroup(g){
+  const v = ask('調査名を変更', g); if(v===null || !v || v===g) return;
+  const l = loadList();
+  if(l.some(b=> split(b.name).g===v)){ alert(`「${v}」は既にあります。`); return; }
+  l.forEach(b=>{ const p = split(b.name); if(p.g===g) b.name = join(v, p.s); });
+  saveList(l); if(folded().has(g)) setFold(v, true); setFold(g, false); render();
+}
+function delItems(nos, label){
+  if(nos.includes(activeNo())){ alert('実施中の対象は削除できません。先に「終了」してください。'); return; }
+  const used = nos.some(hasLog);
+  if(!confirm(`${label} を一覧から削除しますか？` + (used ? '\n\n※開始・終了の記録がある対象を含みます。記録は残り、写真の仕分けにもそのまま使われます。' : '') +
+     '\n\n番号は詰めずに欠番になります（後日の仕分けで、同じ番号に別の対象が入らないようにするため）。')) return;
+  saveList(loadList().filter(b=>!nos.includes(b.no))); render(); toast('削除しました');
 }
 
 // ===== 画面 =====
-const app = document.getElementById('app'), picker = document.getElementById('picker');
-let urls = [], pickTarget = null, renderSeq = 0;
+const app = document.getElementById('app');
 const $ = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
 const esc = (s)=> String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200);}
-function freeUrls(){urls.forEach(u=>URL.revokeObjectURL(u));urls=[];}
-// 写真が読めなかったときは、少し待って読み直す（最大3回）。それでも駄目なら案内を出す
-function retryImg(img, key){
-  let n = 0;
-  img.addEventListener('error', async ()=>{
-    if(n >= 3){
-      img.replaceWith($('<div class="broken">写真を表示できません。<br>「差し替え」で入れ直してください</div>'));
-      return;
-    }
-    n++;
-    await new Promise(r=> setTimeout(r, 500*n));
-    if(!img.isConnected) return;
-    const rec = await getPhoto(key).catch(()=> null);
-    if(!rec || !img.isConnected) return;
-    const u = URL.createObjectURL(rec.blob); urls.push(u); img.src = u;
-  });
-}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
 
-// 一覧画面の「作業者」欄
 function workerBar(){
   const w = getWorker(), other = !!w && !WORKERS.includes(w);
   const el = $(`<div class="worker"><b>作業者</b>
@@ -401,507 +376,210 @@ function workerBar(){
     <input type="text" placeholder="名前を入力" value="${other?esc(w):''}" ${other?'':'hidden'} enterkeyhint="done">
     <span class="wmsg"></span></div>`);
   const sel = el.querySelector('select'), inp = el.querySelector('input'), msg = el.querySelector('.wmsg');
-  const refresh = ()=>{ const v = getWorker(); el.classList.toggle('none', !v); msg.textContent = v ? '' : '作業者を選んでから踏査を始めてください'; };
+  const refresh = ()=>{ const v=getWorker(); el.classList.toggle('none',!v); msg.textContent = v ? '' : '作業者を選んでから開始してください'; };
   sel.onchange = ()=>{
-    if(sel.value==='*'){ inp.hidden = false; inp.value = ''; setWorker(''); inp.focus(); }
-    else{ inp.hidden = true; setWorker(sel.value); if(sel.value) toast(`作業者：${sel.value}`); }
+    if(sel.value==='*'){ inp.hidden=false; inp.value=''; setWorker(''); inp.focus(); }
+    else{ inp.hidden=true; setWorker(sel.value); if(sel.value) toast(`作業者：${sel.value}`); }
     refresh();
   };
   inp.oninput = ()=>{ setWorker(inp.value); refresh(); };
-  inp.onchange = ()=>{ if(getWorker()) toast(`作業者：${getWorker()}`); };
   refresh();
   return el;
 }
 
-async function stats(){
-  const m = new Map(), keys = await allKeys();
-  for(const key of keys){
-    const [n,k] = String(key).split('|'), no=+n;
-    if(!m.has(no)) m.set(no,{set:new Set(), ex:0});
-    if(k===EXTRA) m.get(no).ex++; else m.get(no).set.add(k);
+function itemEl(b, act, log){
+  const p = split(b.name), sp = spans(b.no, log), run = b.no===act;
+  const el = $(`<div class="item ${run?'run':''} ${sp.length&&!run?'done':''}">
+    <span class="no">${codeOf(b)}</span>
+    <div class="body"><div class="nm ${p.s?'':'empty'}">${esc(p.s||'（名前なし）')}</div>
+      <div class="sp">${sp.length ? esc(sp.join('、')) : '未実施'}</div></div></div>`);
+  if(EDIT){
+    const r = $('<button class="ebtn">名前</button>'), d = $('<button class="ebtn del">削除</button>');
+    r.onclick = ()=> renameItem(b.no);
+    d.onclick = ()=> delItems([b.no], `「${codeOf(b)} ${disp(b.name)}」`);
+    el.append(r, d);
+  }else{
+    const s = $(`<button class="sbtn ${run?'on':''}">${run?'■ 終了':'▶ 開始'}</button>`);
+    s.onclick = ()=> run ? stop() : start(b.no);
+    el.append(s);
   }
-  return {m, total:keys.length};
+  return el;
 }
 
-async function renderList(){
-  const seq = ++renderSeq;
-  freeUrls();
-  document.getElementById('htitle').textContent = '踏査写真';
-  document.getElementById('projName').textContent = curProj().name;
-  const list = loadList(), {m:st, total} = await stats(), last = localStorage.getItem(LS_EXPORT), act = activeNo();
-  if(seq!==renderSeq) return;
+function render(){
+  document.getElementById('gname').textContent = gName();
+  const eb = document.getElementById('btnEdit'); eb.textContent = EDIT ? '完了' : '編集'; eb.classList.toggle('on', EDIT);
+  const list = loadList(), act = activeNo(), log = loadLog(), last = localStorage.getItem(LS.exp), fold = folded();
   app.innerHTML = '';
   app.append(workerBar());
-  app.append($(`<p class="summary">写真 ${total} 枚 ／ 最終ZIP保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}</p>`));
-  const g = $('<div class="grid"></div>');
+
+  if(EDIT){
+    const el = $(`<div class="now edit"><div class="txt"><b>編集中</b><br>名前の変更・削除ができます。調査は見出しの「名前」「削除」で、工程ごとまとめて変更・削除します。</div>
+      <button class="bigbtn done">完了</button></div>`);
+    el.querySelector('button').onclick = ()=>{ EDIT=false; render(); };
+    app.append(el);
+  }else if(act!==null){
+    const st = [...log].reverse().find(x=>x.k==='s'), b = itemOf(act);
+    const el = $(`<div class="now run"><div class="txt">実施中<br><b>${esc((b?codeOf(b):st.c||'')+'　'+disp(b?b.name:st.n||''))}</b>　${hm(st.t)}〜</div>
+      <button class="bigbtn">■ 終了</button></div>`);
+    el.querySelector('button').onclick = stop;
+    app.append(el);
+  }else{
+    app.append($(`<div class="now"><div class="txt">着いたら「開始」、離れるときに「終了」。<br>デジカメはその日の最初に「時計を表示」を1枚撮影。</div></div>`));
+  }
+  app.append($(`<p class="summary">記録 ${log.length} 件 ／ 最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}</p>`));
+
+  // 番号順に、単独の対象と調査（工程のまとまり）を並べる
+  const box = $('<div class="list"></div>');
+  if(!list.length){
+    box.append($(`<div class="empty">対象がまだありません。<br>右上の「設定」→「リストをまとめて入力」で作るか、下の「＋ 調査を追加」で1件ずつ追加してください。</div>`));
+  }
+  const blocks = [];
   for(const b of list){
-    const x = st.get(b.no) || {set:new Set(), ex:0};
-    const dots = SLOTS.map(s=>`<span class="dot ${x.set.has(s.k)?'on':''}"></span>`).join('');
-    const el = $(`<button class="card ${x.set.size>=SLOTS.length?'done':''}"><span class="no">No.${b.no}</span>
-      <span class="nm">${esc(b.name||'（橋梁名未設定）')}</span>
-      <span class="dots">${dots}${x.ex?`<span class="ex">その他${x.ex}</span>`:''}${b.no===act?'<span class="ex" style="color:var(--ok);font-weight:700">踏査中</span>':''}</span></button>`);
-    el.onclick = ()=> location.hash = '#b/' + b.no;
-    g.append(el);
+    const p = split(b.name);
+    if(!p.g){ blocks.push({pn:b.pn, solo:b}); continue; }
+    let blk = blocks.find(x=>x.g===p.g);
+    if(!blk){ blk = {pn:b.pn, g:p.g, items:[]}; blocks.push(blk); }
+    blk.items.push(b);
   }
-  const add = $('<button class="card addcard">＋ 橋を追加</button>');
-  add.onclick = addBridge;
-  g.append(add);
-  app.append(g);
-}
-
-async function renderBridge(no){
-  // 描き直しが重なったときは、後から始めた方だけを画面に出す（古い方は途中でやめる）
-  const seq = ++renderSeq, stale = ()=> seq!==renderSeq;
-  freeUrls();
-  const list = loadList(), idx = list.findIndex(b=>b.no===no), b = list[idx] || {no, name:''};
-  document.getElementById('htitle').textContent = 'No.' + no + (b.name?'　'+b.name:'');
-  document.getElementById('projName').textContent = curProj().name;
-
-  // 先に写真をすべて読んでから、画面を一度に組み立てる
-  const recs = [];
-  for(const s of SLOTS){ recs.push(await getPhoto(keyOf(no,s.k))); if(stale()) return; }
-  const d = await db();
-  const extras = await new Promise((res,rej)=>{
-    const out=[], r = d.transaction('photos').objectStore('photos')
-      .openCursor(IDBKeyRange.bound(fk(no+'|'+EXTRA+'|'), fk(no+'|'+EXTRA+'|￿')));
-    r.onsuccess = ()=>{ const c=r.result; if(c){ out.push({key:String(c.key).slice(PID.length+1), ...c.value}); c.continue(); } else res(out); };
-    r.onerror = ()=> rej(r.error);
-  });
-  if(stale()) return;
-
-  app.innerHTML = '';
-  const bar = $(`<div class="bar">
-    <button class="nav" id="bk">← 一覧</button>
-    <button class="title editname" id="en">No.${no}<small>${esc(b.name||'橋梁名未設定')}</small></button>
-    <button class="nav" id="pv">前</button><button class="nav" id="nx">次</button></div>`);
-  bar.querySelector('#bk').onclick = ()=> location.hash = '';
-  bar.querySelector('#en').onclick = ()=>{ if(editBridge(no)) renderBridge(no); };
-  const pv = bar.querySelector('#pv'), nx = bar.querySelector('#nx');
-  pv.disabled = idx<=0; nx.disabled = idx<0 || idx>=list.length-1;
-  pv.onclick = ()=> location.hash = '#b/' + list[idx-1].no;
-  nx.onclick = ()=> location.hash = '#b/' + list[idx+1].no;
-  app.append(bar);
-
-  // 踏査開始（元写真を橋ごとに仕分けるための時刻記録）
-  const act = activeNo(), active = act===no, sp = spans(no);
-  let info = sp.length ? '踏査時間：' + sp.join('、') : '橋に着いたら「開始」、離れるときに「終了」（元写真の自動仕分けに使います）';
-  if(act!==null && !active) info += `<br><b>いま No.${act} を踏査中</b>（ここで開始すると No.${act} は自動で終了）`;
-  const wk = getWorker();
-  info += '<br>作業者：' + (wk ? esc(wk) : '<b style="color:var(--warn)">未選択（一覧画面で選んでください）</b>');
-  const sb = $(`<div class="startbar">
-    <button class="startbtn ${active?'on':''}">${active?'■ この橋の踏査を終了':'▶ この橋の踏査を開始'}</button>
-    <div class="startinfo">${info}</div></div>`);
-  sb.querySelector('.startbtn').onclick = ()=>{
-    if(active){ addEnd(no); toast(`No.${no} 踏査終了 ${hm(Date.now())}`); }
-    else{
-      if(!getWorker()){ alert('作業者が選ばれていません。\n一覧画面の「作業者」で選んでから開始してください。'); location.hash = ''; return; }
-      addStart(no); toast(`No.${no} 踏査開始 ${hm(Date.now())}`);
-    }
-    renderBridge(no);
-  };
-  app.append(sb);
-
-  const wrap = $('<div class="slots"></div>');
-  SLOTS.forEach((s,si)=>{
-    const rec = recs[si];
-    const el = $(`<div class="slot ${s.wide?'wide':''} ${rec?'has':''}"><span class="lbl">${s.n}</span></div>`);
-    if(rec){
-      const u = URL.createObjectURL(rec.blob); urls.push(u);
-      const img = $(`<img alt="" src="${u}">`);
-      el.append(img); retryImg(img, keyOf(no,s.k));
-      addOverlay(el, img, rec.arrows);
-      const na = (rec.arrows||[]).length;
-      const tools = $(`<div class="tools"><button class="tbtn arw">➜ 矢印${na?'('+na+')':''}</button><button class="tbtn">差し替え</button><button class="tbtn del">削除</button></div>`);
-      tools.children[0].onclick = ()=> openArrowEditor(keyOf(no,s.k), `No.${no} ${s.n}`, ()=> renderBridge(no));
-      tools.children[1].onclick = ()=> pick(no,s);
-      tools.children[2].onclick = async ()=>{
-        if(!confirm(`No.${no} の「${s.n}」写真を削除しますか？`)) return;
-        await delPhoto(keyOf(no,s.k)); renderBridge(no);
-      };
-      el.append(tools);
+  blocks.sort((a,b)=>a.pn-b.pn);
+  for(const blk of blocks){
+    if(blk.solo){ box.append(itemEl(blk.solo, act, log)); continue; }
+    const g = blk.g, items = blk.items.sort((a,b)=>a.cn-b.cn);
+    const runHere = items.some(b=>b.no===act), done = items.filter(b=>spans(b.no, log).length).length;
+    const isFold = fold.has(g) && !runHere && !EDIT;
+    const el = $(`<div class="grp ${isFold?'fold':''} ${runHere?'run':''}">
+      <div class="gh"><span class="arw">▼</span><span class="gno">${pad(blk.pn)}</span><span class="gn">${esc(g)}</span>
+        <span class="gc">${runHere?'<b>実施中</b>　':''}${done}/${items.length} 実施</span></div>
+      <div class="gbody"></div></div>`);
+    const gh = el.querySelector('.gh'), body = el.querySelector('.gbody');
+    if(EDIT){
+      const r = $('<button class="ebtn">名前</button>'), d = $('<button class="ebtn del">削除</button>');
+      r.onclick = (e)=>{ e.stopPropagation(); renameGroup(g); };
+      d.onclick = (e)=>{ e.stopPropagation(); delItems(items.map(b=>b.no), `調査「${pad(blk.pn)} ${g}」と工程 ${items.length} 件`); };
+      gh.append(r, d);
     }else{
-      el.append($(`<div class="empty"><b>＋</b>タップして撮影／選択</div>`));
-      const hit = $('<button class="hit" aria-label="写真を追加"></button>');
-      hit.onclick = ()=> pick(no,s);
-      el.append(hit);
+      gh.onclick = ()=>{ if(runHere) return; setFold(g, !fold.has(g)); render(); };
     }
-    wrap.append(el);
-  });
-  app.append(wrap);
-
-  // その他（枚数自由・Excelには貼らない参考写真）
-  app.append($('<div class="sec">その他<small>何枚でも追加可。Excelの枠には貼られず、ZIPに参考写真として入ります</small></div>'));
-  const ex = $('<div class="slots"></div>');
-  extras.sort((a,b)=>a.ts-b.ts).forEach((rec,i)=>{
-    const u = URL.createObjectURL(rec.blob); urls.push(u);
-    const el = $(`<div class="slot has"><span class="lbl">その他${i+1}</span><img alt="" src="${u}">
-      <div class="memo">${esc(rec.memo||'')}</div>
-      <div class="tools"><button class="tbtn arw">➜ 矢印${(rec.arrows||[]).length?'('+rec.arrows.length+')':''}</button><button class="tbtn">メモ</button><button class="tbtn">差し替え</button><button class="tbtn del">削除</button></div></div>`);
-    const img = el.querySelector('img');
-    retryImg(img, rec.key);
-    addOverlay(el, img, rec.arrows);
-    const [ba,bm,br,bd] = el.querySelectorAll('.tbtn');
-    ba.onclick = ()=> openArrowEditor(rec.key, `No.${no} その他${i+1}`, ()=> renderBridge(no));
-    bm.onclick = async ()=>{
-      const v = prompt('この写真のメモ（例：支承、伸縮装置、添架物）', rec.memo||''); if(v===null) return;
-      try{ await rewriteRec(rec.key, rec, {memo:v.trim()}); }
-      catch(e){ alert('メモを保存できませんでした：' + (e && e.message || e)); return; }
-      renderBridge(no);
-    };
-    br.onclick = ()=> pick(no, {k:EXTRA, n:'その他'+(i+1)}, rec);
-    bd.onclick = async ()=>{
-      if(!confirm(`No.${no} の「その他${i+1}」を削除しますか？`)) return;
-      await delPhoto(rec.key); renderBridge(no);
-    };
-    ex.append(el);
-  });
-  const addTile = $(`<div class="slot add"><div class="empty"><b>＋</b>その他を追加</div><button class="hit" aria-label="その他を追加"></button></div>`);
-  addTile.querySelector('.hit').onclick = ()=> pick(no, {k:EXTRA, n:'その他'}, null);
-  ex.append(addTile);
-  app.append(ex);
-}
-
-function pick(no,slot,rec){ pickTarget = {no,slot,rec}; picker.value=''; picker.click(); }
-picker.addEventListener('change', async ()=>{
-  const f = picker.files && picker.files[0]; if(!f || !pickTarget) return;
-  const {no,slot,rec} = pickTarget; pickTarget = null;
-  const busy = $('<div class="busy">保存中…</div>'); document.body.append(busy); busy.style.position='fixed';
-  try{
-    const shot = (await exifTime(f)) || Date.now();   // 撮影時刻（EXIFがなければ今）
-    const blob = await resize(f);
-    if(slot.k===EXTRA){
-      const ts = rec ? rec.ts : Date.now(), key = rec ? rec.key : `${no}|${EXTRA}|${ts}`;
-      await putRec(key, {blob, ts, shot, worker:getWorker(), memo: rec ? (rec.memo||'') : '', arrows: []});
-    }else{
-      await putRec(keyOf(no,slot.k), {blob, ts:Date.now(), shot, worker:getWorker()});
-    }
-    toast(`No.${no}「${slot.n}」を保存しました`);
-  }catch(e){ alert('保存できませんでした：' + (e && e.message || e)); }
-  finally{ busy.remove(); }
-  renderBridge(no);
-});
-
-// ===== 矢印（流水方向など） =====
-// 矢印は写真とは別に {x1,y1,x2,y2,w,c} で保存（x,y＝写真幅・高さに対する0〜1、w＝写真の幅に対する太さ）
-const ACOLORS = ['#e0412f','#f2c200','#ffffff','#1e88e5'];
-// 矢印の外形（7点の多角形）。単位は写真のピクセル
-function arrowPts(x1,y1,x2,y2,w){
-  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, px=-uy, py=ux;
-  const hl=Math.min(w*3.2, L*0.6), hw=w*1.6, sx=x2-ux*hl, sy=y2-uy*hl, h=w/2;
-  return [[x1+px*h,y1+py*h],[sx+px*h,sy+py*h],[sx+px*hw,sy+py*hw],[x2,y2],[sx-px*hw,sy-py*hw],[sx-px*h,sy-py*h],[x1-px*h,y1-py*h]];
-}
-function arrowSvg(a, iw, ih, extra){
-  const pts = arrowPts(a.x1*iw,a.y1*ih,a.x2*iw,a.y2*ih,a.w*iw).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
-  const sw = Math.max(1, a.w*iw*0.12);
-  const edge = a.c==='#ffffff' ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.85)';
-  return `<polygon points="${pts}" fill="${a.c}" stroke="${edge}" stroke-width="${sw.toFixed(1)}" stroke-linejoin="round" ${extra||''}/>`;
-}
-// 枠のサムネイルに矢印を重ねる
-function addOverlay(el, img, arrows){
-  if(!arrows || !arrows.length) return;
-  const put = ()=>{
-    const iw=img.naturalWidth, ih=img.naturalHeight; if(!iw || !img.isConnected) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('class','ov'); svg.setAttribute('viewBox',`0 0 ${iw} ${ih}`); svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-    svg.innerHTML = arrows.map(a=>arrowSvg(a,iw,ih)).join('');
-    img.after(svg);
-  };
-  (img.complete && img.naturalWidth) ? put() : img.addEventListener('load', put, {once:true});
-}
-// ZIP保存時に矢印を写真へ焼き込む
-async function burnArrows(blob, arrows){
-  const bmp = await createImageBitmap(blob), iw=bmp.width, ih=bmp.height;
-  const c = document.createElement('canvas'); c.width=iw; c.height=ih;
-  const g = c.getContext('2d'); g.drawImage(bmp,0,0); bmp.close && bmp.close();
-  for(const a of arrows){
-    const pts = arrowPts(a.x1*iw,a.y1*ih,a.x2*iw,a.y2*ih,a.w*iw);
-    g.beginPath(); pts.forEach((p,i)=> i ? g.lineTo(p[0],p[1]) : g.moveTo(p[0],p[1])); g.closePath();
-    g.lineJoin='round'; g.lineWidth=Math.max(1,a.w*iw*0.12);
-    g.strokeStyle = a.c==='#ffffff' ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.85)'; g.stroke();
-    g.fillStyle=a.c; g.fill();
-  }
-  const out = await new Promise((res,rej)=> c.toBlob(b=> b?res(b):rej(new Error('変換失敗')),'image/jpeg',0.9));
-  c.width = c.height = 0;   // iPadのcanvasメモリをすぐ返す
-  return out;
-}
-
-// ---- 矢印エディタ ----
-const AE = { key:null, rec:null, arrows:[], sel:-1, iw:0, ih:0, scale:1, drag:null, color:ACOLORS[0], w:0.012, onDone:null, busy:false };
-const aeEl = document.getElementById('arrowEd'), aeImg = document.getElementById('aeImg'),
-      aeSvg = document.getElementById('aeSvg'), aeStage = document.getElementById('aeStage'), aeW = document.getElementById('aeW');
-let aeUrl = null;
-
-async function openArrowEditor(key, title, onDone){
-  const rec = await getPhoto(key); if(!rec) return;
-  AE.key=key; AE.rec=rec; AE.onDone=onDone; AE.sel=-1; AE.drag=null;
-  AE.arrows = (rec.arrows||[]).map(a=>({...a}));
-  document.getElementById('aeTitle').textContent = title + ' の矢印';
-  if(aeUrl) URL.revokeObjectURL(aeUrl);
-  aeUrl = URL.createObjectURL(rec.blob); aeImg.src = aeUrl;
-  try{ await aeImg.decode(); }
-  catch(e){ alert('写真を読み込めませんでした。少し待ってからもう一度開くか、「差し替え」で入れ直してください。'); return; }
-  AE.iw=aeImg.naturalWidth; AE.ih=aeImg.naturalHeight;
-  aeEl.classList.add('show'); document.body.style.overflow='hidden';
-  aeLayout(); aeSwatches(); aeSync();
-}
-function aeLayout(){
-  if(!aeEl.classList.contains('show')) return;
-  const r = aeStage.getBoundingClientRect(), m = 8;
-  AE.scale = Math.min((r.width-m*2)/AE.iw, (r.height-m*2)/AE.ih);
-  const w = AE.iw*AE.scale, h = AE.ih*AE.scale;
-  for(const e of [aeImg, aeSvg]){ e.style.width=w+'px'; e.style.height=h+'px'; e.style.left=(r.width-w)/2+'px'; e.style.top=(r.height-h)/2+'px'; }
-  aeSvg.setAttribute('viewBox',`0 0 ${AE.iw} ${AE.ih}`);
-  aeDraw();
-}
-addEventListener('resize', aeLayout);
-function aeSwatches(){
-  const box = document.getElementById('aeSw'); box.innerHTML='';
-  for(const c of ACOLORS){
-    const b = document.createElement('button'); b.className='sw'+(c===aeCur().c?' on':''); b.style.background=c; b.setAttribute('aria-label','色');
-    b.onclick = ()=>{ AE.color=c; if(AE.sel>=0) AE.arrows[AE.sel].c=c; aeSwatches(); aeDraw(); };
-    box.append(b);
-  }
-}
-function aeCur(){ return AE.sel>=0 ? AE.arrows[AE.sel] : {c:AE.color, w:AE.w}; }
-function aeSync(){
-  const has = AE.sel>=0;
-  document.getElementById('aeDel').disabled = !has; document.getElementById('aeFlip').disabled = !has;
-  aeW.value = Math.round(aeCur().w*1000); aeSwatches(); aeDraw();
-}
-function aeDraw(){
-  const iw=AE.iw, ih=AE.ih, hr = 16/AE.scale;   // つまみの半径（画面で16px）
-  let html = AE.arrows.map((a,i)=> arrowSvg(a,iw,ih)).join('');
-  if(AE.sel>=0){
-    const a = AE.arrows[AE.sel];
-    html += `<line x1="${a.x1*iw}" y1="${a.y1*ih}" x2="${a.x2*iw}" y2="${a.y2*ih}" stroke="#f2b705" stroke-width="${2/AE.scale}" stroke-dasharray="${6/AE.scale}"/>`;
-    for(const [x,y] of [[a.x1,a.y1],[a.x2,a.y2]])
-      html += `<circle cx="${x*iw}" cy="${y*ih}" r="${hr}" fill="rgba(242,183,5,.35)" stroke="#f2b705" stroke-width="${3/AE.scale}"/>`;
-  }
-  aeSvg.innerHTML = html;
-}
-function aePt(e){ const r = aeSvg.getBoundingClientRect(); return [(e.clientX-r.left)/r.width, (e.clientY-r.top)/r.height]; }
-function aeHit(p){
-  const iw=AE.iw, ih=AE.ih, x=p[0]*iw, y=p[1]*ih, tol = 26/AE.scale;
-  if(AE.sel>=0){
-    const a = AE.arrows[AE.sel];
-    if(Math.hypot(x-a.x2*iw, y-a.y2*ih) < tol) return {i:AE.sel, part:'end'};
-    if(Math.hypot(x-a.x1*iw, y-a.y1*ih) < tol) return {i:AE.sel, part:'start'};
-  }
-  for(let i=AE.arrows.length-1;i>=0;i--){
-    const a = AE.arrows[i], ax=a.x1*iw, ay=a.y1*ih, bx=a.x2*iw, by=a.y2*ih;
-    const L2=(bx-ax)**2+(by-ay)**2 || 1, t=Math.max(0,Math.min(1,((x-ax)*(bx-ax)+(y-ay)*(by-ay))/L2));
-    if(Math.hypot(x-(ax+t*(bx-ax)), y-(ay+t*(by-ay))) < Math.max(tol, a.w*iw*1.6)) return {i, part:'body'};
-  }
-  return null;
-}
-aeSvg.addEventListener('pointerdown', e=>{
-  e.preventDefault(); aeSvg.setPointerCapture(e.pointerId);
-  const p = aePt(e), h = aeHit(p);
-  if(h){ AE.sel=h.i; AE.drag={part:h.part, p0:p, a0:{...AE.arrows[h.i]}}; }
-  else { AE.arrows.push({x1:p[0],y1:p[1],x2:p[0],y2:p[1],w:AE.w,c:AE.color}); AE.sel=AE.arrows.length-1; AE.drag={part:'new', p0:p}; }
-  aeSync();
-});
-aeSvg.addEventListener('pointermove', e=>{
-  if(!AE.drag) return; e.preventDefault();
-  const p = aePt(e), a = AE.arrows[AE.sel], d = AE.drag, cl = v=>Math.max(0,Math.min(1,v));
-  if(d.part==='end' || d.part==='new'){ a.x2=cl(p[0]); a.y2=cl(p[1]); }
-  else if(d.part==='start'){ a.x1=cl(p[0]); a.y1=cl(p[1]); }
-  else { const dx=p[0]-d.p0[0], dy=p[1]-d.p0[1]; a.x1=d.a0.x1+dx; a.y1=d.a0.y1+dy; a.x2=d.a0.x2+dx; a.y2=d.a0.y2+dy; }
-  aeDraw();
-});
-const aeUp = ()=>{
-  if(!AE.drag) return;
-  if(AE.drag.part==='new'){   // 短すぎる「なぞり」はタップとみなして取り消す
-    const a = AE.arrows[AE.sel];
-    if(Math.hypot((a.x2-a.x1)*AE.iw,(a.y2-a.y1)*AE.ih)*AE.scale < 25){ AE.arrows.pop(); AE.sel=-1; }
-  }
-  AE.drag=null; aeSync();
-};
-aeSvg.addEventListener('pointerup', aeUp); aeSvg.addEventListener('pointercancel', aeUp);
-aeW.addEventListener('input', ()=>{ const w = aeW.value/1000; AE.w=w; if(AE.sel>=0) AE.arrows[AE.sel].w=w; aeDraw(); });
-document.getElementById('aeAdd').onclick = ()=>{
-  AE.arrows.push({x1:0.3,y1:0.6,x2:0.7,y2:0.6,w:AE.w,c:AE.color}); AE.sel=AE.arrows.length-1; aeSync();
-};
-document.getElementById('aeFlip').onclick = ()=>{
-  const a = AE.arrows[AE.sel]; if(!a) return; [a.x1,a.x2,a.y1,a.y2]=[a.x2,a.x1,a.y2,a.y1]; aeDraw();
-};
-document.getElementById('aeDel').onclick = ()=>{ if(AE.sel<0) return; AE.arrows.splice(AE.sel,1); AE.sel=-1; aeSync(); };
-function aeClose(){
-  aeEl.classList.remove('show'); document.body.style.overflow='';
-  aeImg.removeAttribute('src'); if(aeUrl){ URL.revokeObjectURL(aeUrl); aeUrl=null; }
-}
-document.getElementById('aeCancel').onclick = aeClose;
-document.getElementById('aeDone').onclick = async ()=>{
-  if(AE.busy) return;   // 連打で二重保存しない
-  AE.busy = true;
-  try{ await rewriteRec(AE.key, AE.rec, {arrows:AE.arrows}); toast(`矢印 ${AE.arrows.length} 本を保存しました`); }
-  catch(e){ alert('保存できませんでした：' + (e && e.message || e)); return; }
-  finally{ AE.busy = false; }
-  aeClose(); AE.onDone && AE.onDone();
-};
-
-// ===== ZIP保存 =====
-async function exportZip(){
-  const keys = (await allKeys()).map(String);
-  if(!keys.length){ alert('保存する写真がありません。'); return; }
-  if(!getWorker() && !confirm('作業者が選ばれていません。\n元写真の仕分けで名前を付けるため、一覧画面で選んでからの保存をおすすめします。\n\nこのままZIP保存しますか？')) return;
-  const files = [], rows = [['No','橋梁名','部位','ファイル名','メモ','作業者']], names = new Map(loadList().map(b=>[b.no,b.name]));
-  const recs = [];
-  for(const key of keys){ const [no,k] = key.split('|'); recs.push({no:+no, k, key, rec: await getPhoto(key)}); }
-  const order = (k)=>{ const i = SLOTS.findIndex(s=>s.k===k); return i<0 ? 99 : i; };
-  recs.sort((a,b)=> a.no-b.no || order(a.k)-order(b.k) || a.rec.ts-b.rec.ts);
-  const exN = new Map(), bad = [];
-  for(const r of recs){
-    const p = String(r.no).padStart(2,'0'); let fname, label;
-    if(r.k===EXTRA){ const n=(exN.get(r.no)||0)+1; exN.set(r.no,n); fname=`${p}_sonota_${String(n).padStart(2,'0')}.jpg`; label='その他'+n; }
-    else { fname=`${p}_${r.k}.jpg`; label=SLOTS[order(r.k)].n; }
-    let data;
-    try{
-      const outBlob = (r.rec.arrows && r.rec.arrows.length) ? await burnArrows(r.rec.blob, r.rec.arrows) : r.rec.blob;
-      data = new Uint8Array(await outBlob.arrayBuffer());
-    }catch(e){ bad.push(`No.${r.no} ${label}`); continue; }   // 読めない写真は飛ばして、最後に知らせる
-    files.push({name:fname, data});
-    rows.push([r.no, names.get(r.no)||'', label, fname, r.rec.memo||'', r.rec.worker||'']);
-  }
-  if(!files.length){ alert('写真を読み込めませんでした。少し待ってからもう一度お試しください。'); return; }
-  const csv = '﻿' + rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-  files.push({name:'photo_list.csv', data:new TextEncoder().encode(csv)});
-  // 元写真の仕分け用ログ：踏査開始の時刻と、枠に入れた写真の撮影時刻
-  const ev = loadLog().map(x=>({no:x.no, kind: x.end ? '終了' : '開始', t:x.t, part:'', w:x.w||''}));
-  for(const r of recs){ if(r.rec.shot) ev.push({no:r.no, kind:'写真', t:r.rec.shot, part: r.k===EXTRA ? 'その他' : SLOTS[order(r.k)].n, w:r.rec.worker||''}); }
-  ev.sort((a,b)=>a.t-b.t);
-  const lrows = [['No','橋梁名','種別','日時','部位','作業者'], ...ev.map(e=>[e.no, names.get(e.no)||'', e.kind, fmtDT(e.t), e.part, e.w])];
-  const lcsv = '﻿' + lrows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-  files.push({name:'bridge_log.csv', data:new TextEncoder().encode(lcsv)});
-  if(bad.length && !confirm(`次の写真を読み込めませんでした（ZIPに入りません）。\n${bad.join('\n')}\n\n「差し替え」で入れ直してから保存するのがおすすめです。\nこのままZIP保存しますか？`)) return;
-  const d = new Date(), stamp = d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')
-            +'_'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
-  const safe = curProj().name.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40) || 'gyomu';
-  const name = `${safe}_tousa_photo_${stamp}.zip`;
-  const zip = new File([makeZip(files)], name, {type:'application/zip'});
-  try{
-    if(navigator.canShare && navigator.canShare({files:[zip]})){
-      await navigator.share({files:[zip], title:name});
-    }else{
-      const a = document.createElement('a'); a.href = URL.createObjectURL(zip); a.download = name;
-      document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
-    }
-    localStorage.setItem(LS_EXPORT, String(Date.now()));
-    toast(`${files.length-2}枚をZIPにしました`);
-    if(!location.hash) renderList();
-  }catch(e){ if(e && e.name!=='AbortError') alert('ZIP保存に失敗しました：' + e.message); }
-}
-
-// ===== 設定 =====
-const dlg = document.getElementById('dlgSettings');
-document.getElementById('btnSettings').onclick = async ()=>{
-  const v = localStorage.getItem(LS_LIST);
-  document.getElementById('taList').value = v ? JSON.parse(v).map(b=>b.no+'\t'+b.name).join('\n') : '';
-  const n = (await allKeys()).length; let info = `業務「${curProj().name}」の写真 ${n} 枚`;
-  try{ const e = await navigator.storage.estimate(); info += `（端末全体の使用 約${Math.round(e.usage/1048576)}MB）`; }catch(_){}
-  document.getElementById('storeInfo').textContent = info + '。ZIP保存してPCへ渡した後に削除してください。';
-  dlg.showModal();
-};
-document.getElementById('btnCloseSet').onclick = ()=> dlg.close();
-document.getElementById('btnSaveList').onclick = ()=>{
-  const t = document.getElementById('taList').value.trim();
-  if(!t){ localStorage.removeItem(LS_LIST); }
-  else{
-    const l = parseList(t);
-    if(!l.length){ alert('リストを読み取れませんでした。'); return; }
-    localStorage.setItem(LS_LIST, JSON.stringify(l));
-  }
-  dlg.close(); route(); toast('リストを保存しました');
-};
-document.getElementById('btnClearAll').onclick = async ()=>{
-  const last = localStorage.getItem(LS_EXPORT);
-  if(!confirm(`業務「${curProj().name}」の写真をすべて削除します。` + (last?'':'\n※この業務はまだ一度もZIP保存していません。') + '\nよろしいですか？')) return;
-  await clearAll(); localStorage.removeItem(LS_EXPORT); localStorage.removeItem(LS_LOG); dlg.close(); location.hash=''; route(); toast('削除しました');
-};
-document.getElementById('btnExport').onclick = exportZip;
-
-// ===== 業務（プロジェクト）管理 =====
-function projects(){
-  try{ const v = JSON.parse(localStorage.getItem(LS_PROJ)||'null'); if(Array.isArray(v) && v.length) return v; }catch(e){}
-  return [];
-}
-function saveProjects(p){ localStorage.setItem(LS_PROJ, JSON.stringify(p)); }
-function curProj(){ return projects().find(p=>p.id===PID) || {id:PID, name:'業務'}; }
-function setProject(id){
-  PID = id; LS_LIST = 'tousa.list.' + id; LS_EXPORT = 'tousa.lastExport.' + id; LS_LOG = 'tousa.log.' + id;
-  localStorage.setItem(LS_CUR, id);
-}
-const newId = ()=> 'p' + Date.now().toString(36);
-
-// 旧版（業務機能なし）のデータを「業務1」に引き継ぐ
-async function initProjects(){
-  let p = projects();
-  if(!p.length){
-    p = [{id:'p1', name:'業務1'}]; saveProjects(p);
-    const ol = localStorage.getItem('tousa.list'), oe = localStorage.getItem('tousa.lastExport');
-    if(ol){ localStorage.setItem('tousa.list.p1', ol); localStorage.removeItem('tousa.list'); }
-    if(oe){ localStorage.setItem('tousa.lastExport.p1', oe); localStorage.removeItem('tousa.lastExport'); }
-    const d = await db();
-    await new Promise((res,rej)=>{
-      const t = d.transaction('photos','readwrite'), st = t.objectStore('photos');
-      st.openCursor().onsuccess = (e)=>{
-        const c = e.target.result; if(!c) return;
-        const k = String(c.key);
-        if(/^\d/.test(k)){ st.put(c.value, 'p1|' + k); st.delete(c.key); }   // 旧キーは数字で始まる
-        c.continue();
-      };
-      t.oncomplete = res; t.onerror = ()=> rej(t.error);
-    });
-  }
-  const cur = localStorage.getItem(LS_CUR);
-  setProject(p.some(x=>x.id===cur) ? cur : p[0].id);
-}
-
-const dlgP = document.getElementById('dlgProj');
-async function openProj(){
-  const d = await db();
-  const keys = await new Promise((res,rej)=>{ const r = d.transaction('photos').objectStore('photos').getAllKeys(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
-  const cnt = new Map(); keys.forEach(k=>{ const id = String(k).split('|')[0]; cnt.set(id,(cnt.get(id)||0)+1); });
-  const box = document.getElementById('plist'); box.innerHTML = '';
-  for(const p of projects()){
-    const el = $(`<button class="pitem ${p.id===PID?'cur':''}"><span class="mk"></span><span class="pn">${esc(p.name)}</span><span class="pc">写真 ${cnt.get(p.id)||0} 枚</span></button>`);
-    el.onclick = ()=>{ setProject(p.id); dlgP.close(); location.hash=''; route(); toast(`「${p.name}」に切り替えました`); };
+    for(const b of items) body.append(itemEl(b, act, log));
+    const add = $('<button class="addbtn">＋ 工程を追加</button>'); add.onclick = ()=> addProc(g);
+    body.append(add);
     box.append(el);
   }
-  if(!dlgP.open) dlgP.showModal();
+  const addS = $('<button class="addbtn big">＋ 調査を追加</button>'); addS.onclick = addSurvey;
+  box.append(addS);
+  app.append(box);
 }
-document.getElementById('btnProj').onclick = openProj;
-document.getElementById('btnProjClose').onclick = ()=> dlgP.close();
-document.getElementById('btnProjAdd').onclick = ()=>{
-  const p = projects(), v = prompt('新しい業務名（例：R7焼津市橋梁点検）', `業務${p.length+1}`);
-  if(v===null || !v.trim()) return;
-  const id = newId(); p.push({id, name:v.trim()}); saveProjects(p);
-  setProject(id); dlgP.close(); location.hash=''; route(); toast(`「${v.trim()}」を追加しました`);
-};
-document.getElementById('btnProjRename').onclick = ()=>{
-  const p = projects(), c = p.find(x=>x.id===PID); if(!c) return;
-  const v = prompt('業務名を変更', c.name); if(v===null || !v.trim()) return;
-  c.name = v.trim(); saveProjects(p); openProj(); route();
-};
-document.getElementById('btnProjDel').onclick = async ()=>{
-  const c = curProj(), n = (await allKeys()).length, last = localStorage.getItem(LS_EXPORT);
-  if(!confirm(`業務「${c.name}」を削除します（写真 ${n} 枚と橋梁リストも消えます）。` + (n && !last ? '\n※この業務はまだ一度もZIP保存していません。' : '') + '\nよろしいですか？')) return;
-  await clearAll(); localStorage.removeItem(LS_LIST); localStorage.removeItem(LS_EXPORT); localStorage.removeItem(LS_LOG);
-  let p = projects().filter(x=>x.id!==PID);
-  if(!p.length) p = [{id:newId(), name:'業務1'}];
-  saveProjects(p); setProject(p[0].id); dlgP.close(); location.hash=''; route(); toast('業務を削除しました');
+
+document.getElementById('btnEdit').onclick = ()=>{ EDIT = !EDIT; render(); window.scrollTo(0,0); };
+
+// ===== 直前の取消 =====
+document.getElementById('btnUndo').onclick = ()=>{
+  const l = loadLog(), x = l[l.length-1];
+  if(!x){ alert('取り消す記録がありません。'); return; }
+  const y = l[l.length-2], pair = x.k==='s' && y && y.k==='e' && y.t===x.t;
+  const nm = (r)=> disp(nameOf(r.no)||r.n||'');
+  const what = `${nm(x)} の${x.k==='s'?'開始':'終了'}（${hm(x.t)}）` + (pair ? `\nと、同時に記録した ${nm(y)} の終了` : '');
+  if(!confirm(`${what}\nを取り消しますか？`)) return;
+  l.pop(); if(pair) l.pop(); saveLog(l); render(); toast('取り消しました');
 };
 
-// ===== ルーティング =====
-function route(){
-  const m = location.hash.match(/^#b\/(\d+)$/);
-  (m ? renderBridge(+m[1]) : renderList()).catch(e=> app.textContent = 'エラー：' + e.message);
-  window.scrollTo(0,0);
+// ===== 時計（デジカメの時計合わせ用） =====
+const ck = document.getElementById('clock'); let ckTimer = null;
+const WD = ['日','月','火','水','木','金','土'];
+function tick(){
+  const d = new Date();
+  document.getElementById('ckD').textContent = `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}（${WD[d.getDay()]}）`;
+  document.getElementById('ckT').textContent = `${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
 }
-addEventListener('hashchange', route);
-initProjects().then(route).catch(e=> app.textContent = '起動エラー：' + e.message);
+document.getElementById('btnClock').onclick = ()=>{ tick(); ck.classList.add('show'); ckTimer = setInterval(tick, 200); };
+document.getElementById('ckClose').onclick = ()=>{ ck.classList.remove('show'); clearInterval(ckTimer); };
 
-// オフライン対応・保存領域の保護
+// ===== 記録を保存（CSV）。6列目に番号（01／01-01）を追加。マクロは番号でフォルダを作る =====
+async function exportCsv(){
+  const log = loadLog();
+  if(!log.length){ alert('保存する記録がありません。'); return; }
+  if(activeNo()!==null && !confirm(`${disp(nameOf(activeNo()))} がまだ実施中です（終了していません）。\nこのまま保存しますか？`)) return;
+  const items = new Map(loadList().map(b=>[b.no,b]));
+  // 名前・番号は今の一覧を優先。一覧から削除した対象は、記録したときのものを使う
+  const rows = [['No','対象名','種別','日時','作業者','番号'], ...log.map(x=>{
+    const b = items.get(x.no);
+    return [x.no, b ? b.name : (x.n||''), x.k==='s'?'開始':'終了', fmtDT(x.t), x.w||'', b ? codeOf(b) : (x.c||'')];
+  })];
+  const csv = '﻿' + rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n') + '\r\n';
+  const d = new Date(), stamp = `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`;
+  const safe = gName().replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40) || 'gyomu';
+  const fname = `${safe}_仕分け記録_${stamp}.csv`;
+  const file = new File([csv], fname, {type:'text/csv'});
+  try{
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:fname});
+    }else{
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = fname;
+      document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+    }
+    localStorage.setItem(LS.exp, String(Date.now()));
+    toast(`記録 ${log.length} 件を保存しました`); render();
+  }catch(e){ if(e && e.name!=='AbortError') alert('保存に失敗しました：' + e.message); }
+}
+document.getElementById('btnExport').onclick = exportCsv;
+
+// ===== まとめて入力 =====
+const dlgB = document.getElementById('dlgBulk'), taB = document.getElementById('taBulk'), pvB = document.getElementById('pvBulk');
+function preview(){
+  const parsed = parseBulk(taB.value);
+  if(!parsed.length){ pvB.textContent = '（入力するとここに表示されます）'; return; }
+  const r = mergeBulk(parsed, 'add');
+  pvB.innerHTML = treeText(r.list, r.added);
+}
+taB.addEventListener('input', preview);
+function openBulk(){ dlgS.close(); preview(); dlgB.showModal(); }
+document.getElementById('btnOpenBulk').onclick = openBulk;
+document.getElementById('btnBulkClose').onclick = ()=> dlgB.close();
+document.getElementById('btnLoadCur').onclick = ()=>{ taB.value = toIndent(loadList()); preview(); };
+document.getElementById('btnClearBulk').onclick = ()=>{ taB.value = ''; preview(); };
+document.getElementById('btnBulkAdd').onclick = ()=>{
+  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  const r = mergeBulk(parsed, 'add');
+  if(!r.added.length){ alert('新しく増える対象はありません（すべて既にあります）。'); return; }
+  saveList(r.list); dlgB.close(); render(); toast(`${r.added.length} 件を追加しました`);
+};
+document.getElementById('btnBulkReplace').onclick = ()=>{
+  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  if(activeNo()!==null){ alert('実施中の対象があります。先に「終了」してから置き換えてください。'); return; }
+  const r = mergeBulk(parsed, 'replace');
+  const n = loadList().length, logged = loadLog().length;
+  if(n && !confirm(`今のリスト（${n} 件）を、入力した ${r.list.length} 件に置き換えます。\n番号は 01 から振り直します。` +
+     (logged ? '\n\n※今日の記録がある場合は、置き換える前に「記録を保存」しておいてください（番号が変わるため）。' : '') + '\n\nよろしいですか？')) return;
+  saveList(r.list); dlgB.close(); render(); toast(`${r.list.length} 件のリストにしました`);
+};
+
+// ===== 設定 =====
+const dlgS = document.getElementById('dlgSettings');
+document.getElementById('btnSettings').onclick = ()=>{
+  document.getElementById('inName').value = gName();
+  const n = loadLog().length, last = localStorage.getItem(LS.exp);
+  document.getElementById('logInfo').textContent = `記録 ${n} 件（最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}）。` +
+    '次の業務を始める前に、「記録を保存」してPCへ渡してから消去してください。';
+  dlgS.showModal();
+};
+document.getElementById('btnCloseSet').onclick = ()=> dlgS.close();
+document.getElementById('btnSaveName').onclick = ()=>{
+  const nm = document.getElementById('inName').value.trim();
+  nm ? localStorage.setItem(LS.name, nm) : localStorage.removeItem(LS.name);
+  render(); toast('業務名を保存しました');
+};
+document.getElementById('btnClearLog').onclick = ()=>{
+  const n = loadLog().length, last = +(localStorage.getItem(LS.exp)||0), lastT = n ? loadLog()[n-1].t : 0;
+  if(!n){ alert('記録はありません。'); return; }
+  const unsaved = !last || last < lastT;
+  if(!confirm(`開始・終了の記録 ${n} 件を消去します。` + (unsaved ? '\n※最後の記録のあと、まだ「記録を保存」していません。' : '') + '\nよろしいですか？')) return;
+  localStorage.removeItem(LS.log); localStorage.removeItem(LS.exp); dlgS.close(); render(); toast('記録を消去しました');
+};
+
+render();
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && !dlgS.open && !dlgB.open) render(); });
+
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 </script>
