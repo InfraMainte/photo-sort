@@ -97,6 +97,16 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);
   background:#17211b;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
+.item .no{font-variant-numeric:tabular-nums}
+.gh .gno{font-size:15px;font-weight:700;color:var(--sub);font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:6px;margin:6px 0 8px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--sub)}
+.pv{border:1px solid var(--line);border-radius:10px;background:#f7faf8;padding:10px 12px;font-size:14px;line-height:1.7;max-height:240px;overflow:auto;white-space:pre;font-variant-numeric:tabular-nums}
+.pv .pp{font-weight:700}
+.pv .pc{color:var(--sub)}
+.pv .new{color:var(--ok);font-weight:700}
+.hint{font-size:13px;color:var(--sub);line-height:1.6;background:#f7faf8;border-radius:10px;padding:8px 12px;margin:6px 0}
+.hint code{font-family:inherit;background:#e3ece6;border-radius:4px;padding:0 4px}
 </style>
 </head>
 <body>
@@ -120,25 +130,39 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
   <button id="ckClose">閉じる</button>
 </div>
 
+<dialog id="dlgBulk"><div class="dlg">
+  <h2>リストをまとめて入力</h2>
+  <div class="hint">
+    <b>インデント</b>：調査名の行の下に、工程名を<b>行頭に空白か「・」</b>を付けて書く<br>
+    <b>Excel貼り付け</b>：A列＝調査名、B列＝工程名（A列が空の行は上の調査の続き。B列は「,」で複数可）<br>
+    工程のない行は、それだけで1つの対象になります。
+  </div>
+  <textarea id="taBulk" placeholder="○○調査&#10;・踏査&#10;・計測&#10;△△調査&#10;・採取&#10;単独の対象"></textarea>
+  <div class="tabs"><button class="tab" id="btnLoadCur">今のリストを読み込む</button><button class="tab" id="btnClearBulk">欄を空にする</button></div>
+  <p style="margin:8px 0 4px"><b>反映後のイメージ</b>（緑＝新しく増える分。「追加」の場合）</p>
+  <div class="pv" id="pvBulk">（入力するとここに表示されます）</div>
+  <div class="row">
+    <button class="btn" id="btnBulkClose">閉じる</button>
+    <button class="btn" id="btnBulkAdd">追加</button>
+    <button class="btn primary" id="btnBulkReplace">置き換え</button>
+  </div>
+</div></dialog>
+
 <dialog id="dlgSettings"><div class="dlg">
   <h2>業務名</h2>
   <p>保存する記録のファイル名に入ります。</p>
   <input type="text" id="inName" placeholder="例：R7○○調査">
+  <div class="row"><button class="btn primary" id="btnSaveName">業務名を保存</button></div>
   <hr>
-  <h2>対象リスト（まとめて貼り付け）</h2>
-  <p>1行に「No（タブ／カンマ／空白）名前」。名前だけの行は番号を自動で付けます。<br>
-     <b>「調査名／工程名」</b>と書くと調査ごとにまとめて表示し、PCでも2階層のフォルダに仕分けます。<br>
-     1件ずつの追加・削除は、一覧の「＋」と右上の「編集」でできます。</p>
-  <textarea id="taList" placeholder="1&#9;○○調査／踏査&#10;2&#9;○○調査／計測&#10;3&#9;△△調査／採取"></textarea>
-  <div class="row">
-    <button class="btn" id="btnCloseSet">閉じる</button>
-    <button class="btn primary" id="btnSaveSet">保存</button>
-  </div>
+  <h2>対象リスト</h2>
+  <p>調査（親）と工程（子）のリストを、インデントかExcelの貼り付けでまとめて作れます。<br>1件ずつの追加・削除は、一覧の「＋」と右上の「編集」で。</p>
+  <div class="row" style="justify-content:flex-start;margin-top:4px"><button class="btn primary" id="btnOpenBulk">リストをまとめて入力</button></div>
   <hr>
   <h2>開始・終了の記録</h2>
   <p id="logInfo">—</p>
   <div class="row">
     <button class="btn danger" id="btnClearLog">記録をすべて消去</button>
+    <button class="btn" id="btnCloseSet">閉じる</button>
   </div>
 </div></dialog>
 
@@ -150,9 +174,11 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 // 保存キーは踏査写真アプリ（tousa.*）と別名にする
 const LS = { name:'psort.name', list:'psort.list', log:'psort.log', worker:'psort.worker', exp:'psort.lastExport', fold:'psort.fold' };
 const WORKERS = ['青木','髙原','山口','赤池'];   // 候補以外は「その他（入力）」
-let EDIT = false;                              // 編集モード（名前変更・削除）
+const PAD = 2;                                  // 番号の桁数（01／01-01）。1にすると 1／1-1
+let EDIT = false;                               // 編集モード（名前変更・削除）
 
 // ===== 保存 =====
+// リストの1件：{no:内部番号（記録のキー・使い回さない）, name:'調査名／工程名' または '名前', pn:調査の番号, cn:工程の番号（工程なしは0）}
 const ls = {
   get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)||'null'); return v ?? d; }catch(e){ return d; } },
   set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
@@ -160,45 +186,121 @@ const ls = {
 const gName = ()=> (localStorage.getItem(LS.name)||'').trim();
 const getWorker = ()=> (localStorage.getItem(LS.worker)||'').trim();
 function setWorker(v){ v=(v||'').trim(); v ? localStorage.setItem(LS.worker,v) : localStorage.removeItem(LS.worker); }
-function loadList(){ const v = ls.get(LS.list, []); return Array.isArray(v) ? v : []; }
-function saveList(l){ l.sort((a,b)=>a.no-b.no); ls.set(LS.list, l); }
+function loadList(){
+  let l = ls.get(LS.list, []); if(!Array.isArray(l)) l = [];
+  // 旧版（番号なし）のリストに、今の並びで番号を付ける
+  if(l.some(b=>!(b.pn>0))){
+    l.sort((a,b)=>a.no-b.no);
+    let pn = Math.max(0, ...l.filter(b=>b.pn>0).map(b=>b.pn));
+    const gp = new Map(l.filter(b=>b.pn>0).map(b=>[split(b.name).g, b.pn]));
+    for(const b of l){
+      if(b.pn>0) continue;
+      const p = split(b.name);
+      if(p.g){
+        if(!gp.has(p.g)) gp.set(p.g, ++pn);
+        b.pn = gp.get(p.g); b.cn = Math.max(0, ...l.filter(x=>x!==b && x.pn===b.pn).map(x=>x.cn||0)) + 1;
+      }else{ b.pn = ++pn; b.cn = 0; }
+    }
+    saveList(l);
+  }
+  return l;
+}
+function saveList(l){ l.sort((a,b)=> a.pn-b.pn || a.cn-b.cn || a.no-b.no); ls.set(LS.list, l); }
 const loadLog = ()=>{ const v = ls.get(LS.log, []); return Array.isArray(v) ? v : []; };
 const saveLog = (l)=> ls.set(LS.log, l);
 const folded = ()=> new Set(ls.get(LS.fold, []));
 function setFold(g, on){ const s = folded(); on ? s.add(g) : s.delete(g); ls.set(LS.fold, [...s]); }
-// 実施中の対象（最後の記録が「開始」ならそのNo）
 function activeNo(){ const l = loadLog(), x = l[l.length-1]; return x && x.k==='s' ? x.no : null; }
-// 次の番号（リストと記録の両方の最大＋1。削除した対象の番号は使い回さない）
-function nextNo(){ return Math.max(0, ...loadList().map(b=>b.no), ...loadLog().map(x=>x.no)) + 1; }
+// 次の内部番号（リストと記録の両方の最大＋1。削除した対象の番号は使い回さない）
+function nextNo(l){ return Math.max(0, ...(l||loadList()).map(b=>b.no), ...loadLog().map(x=>x.no)) + 1; }
 const hasLog = (no)=> loadLog().some(x=>x.no===no);
 
-// 「調査名／工程名」を分ける（区切りは全角／か半角/）
+// 「調査名／工程名」を分ける（内部の区切り。画面では入力しない）
 function split(name){
   const m = String(name||'').match(/^(.+?)\s*[／/]\s*(.+)$/);
   return m ? {g:m[1].trim(), s:m[2].trim()} : {g:'', s:String(name||'').trim()};
 }
 const join = (g, s)=> g ? `${g}／${s}` : s;
 const disp = (name)=>{ const p = split(name); return p.g ? `${p.g} ＞ ${p.s}` : (p.s || '（名前なし）'); };
+const pad = (n)=> String(n).padStart(PAD,'0');
+const codeOf = (b)=> b ? (b.cn ? `${pad(b.pn)}-${pad(b.cn)}` : pad(b.pn)) : '';
+const clean = (s)=> String(s||'').replace(/[／/]/g,'・').trim();
+const itemOf = (no)=> loadList().find(x=>x.no===no);
 
-function parseList(text){
-  const out=[]; let seq=0;
-  for(const raw of text.split(/\r?\n/)){
-    const line = raw.trim(); if(!line) continue;
-    const m = line.match(/^(\d{1,4})[\t,，\s　.．、)）]+(.*)$/);
-    if(m){ out.push({no:+m[1], name:m[2].trim()}); seq=+m[1]; }
-    else if(/^\d{1,4}$/.test(line)){ out.push({no:+line,name:''}); seq=+line; }
-    else if(!/^(No|例)/i.test(line)){ seq++; out.push({no:seq,name:line}); }
+// ===== まとめて入力（インデント／Excel貼り付け） =====
+// 戻り値：[{g:'調査名', kids:['工程',…]}]（kidsが空なら、調査名だけの単独の対象）
+function parseBulk(text){
+  const out = []; let cur = null;
+  const names = (s)=> s.split(/[\t,，]/).map(clean).filter(Boolean);
+  for(const raw of String(text).split(/\r?\n/)){
+    if(!raw.trim()) continue;
+    if(/^[\s　]|^[・\-•*＊－]/.test(raw)){                 // 行頭が空白・タブ・「・」→ 工程
+      const ks = names(raw.replace(/^[\s　・\-•*＊－]+/, ''));
+      if(cur) cur.kids.push(...ks); else ks.forEach(k=> out.push({g:k, kids:[]}));
+    }else{                                                  // 調査（タブの右は工程）
+      const cols = raw.split('\t');
+      if(cols.length>1 && /^\s*\d+\s*$/.test(cols[0])) cols.shift();   // ExcelのNo列は無視
+      const g = clean(cols[0].replace(/^\s*\d+[.．)）]\s*/, ''));
+      if(!g){ const ks = names(cols.slice(1).join('\t')); if(cur) cur.kids.push(...ks); continue; }   // No列あり・調査名が空の行
+      cur = {g, kids: names(cols.slice(1).join('\t'))}; out.push(cur);
+    }
   }
-  const seen=new Set(); return out.filter(b=> b.no>0 && !seen.has(b.no) && seen.add(b.no));
+  out.forEach(x=> x.kids = [...new Set(x.kids)]);
+  return out;
+}
+// mode：'add'＝今のリストに追加（同じ調査名には工程を足す）、'replace'＝置き換え
+function mergeBulk(parsed, mode){
+  const l = mode==='replace' ? [] : loadList().map(b=>({...b})), added = [];
+  let no = nextNo(loadList());
+  let pnMax = Math.max(0, ...l.map(b=>b.pn));
+  for(const x of parsed){
+    const grp = l.filter(b=> split(b.name).g===x.g);
+    if(x.kids.length){
+      const pn = grp.length ? grp[0].pn : ++pnMax;
+      let cn = Math.max(0, ...grp.map(b=>b.cn));
+      for(const k of x.kids){
+        if(grp.some(b=> split(b.name).s===k)) continue;
+        const b = {no:no++, name:join(x.g,k), pn, cn:++cn}; l.push(b); added.push(b);
+      }
+    }else{
+      if(l.some(b=> !split(b.name).g && b.name===x.g)) continue;
+      const b = {no:no++, name:x.g, pn:++pnMax, cn:0}; l.push(b); added.push(b);
+    }
+  }
+  return {list:l, added};
+}
+function treeText(l, added){
+  const ad = new Set((added||[]).map(b=>b.no)), out = [];
+  const sorted = [...l].sort((a,b)=> a.pn-b.pn || a.cn-b.cn);
+  let lastPn = 0;
+  for(const b of sorted){
+    const p = split(b.name), mk = (s)=> ad.has(b.no) ? `<span class="new">${s}</span>` : s;
+    if(b.cn){
+      if(b.pn!==lastPn) out.push(`<span class="pp">${pad(b.pn)}　${esc(p.g)}</span>`);
+      out.push(`<span class="pc">　　${mk(codeOf(b)+'　'+esc(p.s))}</span>`);
+    }else out.push(`<span class="pp">${mk(pad(b.pn)+'　'+esc(p.s))}</span>`);
+    lastPn = b.pn;
+  }
+  return out.length ? out.join('\n') : '（対象がありません）';
+}
+function toIndent(l){
+  const out = []; let lastPn = 0;
+  for(const b of [...l].sort((a,b)=> a.pn-b.pn || a.cn-b.cn)){
+    const p = split(b.name);
+    if(b.cn){ if(b.pn!==lastPn) out.push(p.g); out.push('・' + p.s); }
+    else out.push(p.s);
+    lastPn = b.pn;
+  }
+  return out.join('\n');
 }
 
 // ===== 時刻 =====
 const z = (n)=>String(n).padStart(2,'0');
 const hm = (t)=>{ const d=new Date(t); return z(d.getHours())+':'+z(d.getMinutes()); };
 function fmtDT(t){ const d=new Date(t); return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; }
-function spans(no){
+function spans(no, log){
   const out=[]; let cur=null;
-  for(const x of loadLog()){
+  for(const x of (log||loadLog())){
     if(x.k==='s' && x.no===no){ if(cur!==null) out.push(hm(cur)+'〜'); cur=x.t; }
     else if(cur!==null){ out.push(hm(cur)+'〜'+hm(x.t)); cur=null; }
   }
@@ -207,57 +309,55 @@ function spans(no){
 }
 
 // ===== 開始・終了 =====
-const nameOf = (no)=>{ const b = loadList().find(x=>x.no===no); return b ? b.name : ''; };
+const nameOf = (no)=>{ const b = itemOf(no); return b ? b.name : ''; };
+function rec(no, k, t){ const b = itemOf(no); return {no, t, k, w:getWorker(), n:b?b.name:'', c:codeOf(b)}; }
 function start(no){
   if(!getWorker()){ alert('作業者が選ばれていません。\n画面上の「作業者」で選んでから開始してください。'); return; }
-  const l = loadLog(), t = Date.now(), act = activeNo(), w = getWorker();
-  if(act!==null) l.push({no:act, t, k:'e', w, n:nameOf(act)});      // 別の対象を実施中なら、同じ時刻で終了させる
-  l.push({no, t, k:'s', w, n:nameOf(no)}); saveLog(l);
+  const l = loadLog(), t = Date.now(), act = activeNo();
+  if(act!==null) l.push(rec(act, 'e', t));      // 別の対象を実施中なら、同じ時刻で終了させる
+  l.push(rec(no, 's', t)); saveLog(l);
   toast(`開始 ${hm(t)}：${disp(nameOf(no))}`);
   render();
 }
 function stop(){
   const act = activeNo(); if(act===null) return;
-  const l = loadLog(), t = Date.now(); l.push({no:act, t, k:'e', w:getWorker(), n:nameOf(act)}); saveLog(l);
+  const l = loadLog(), t = Date.now(); l.push(rec(act, 'e', t)); saveLog(l);
   toast(`終了 ${hm(t)}：${disp(nameOf(act))}`); render();
 }
 
-// ===== 追加・名前変更・削除 =====
-function ask(msg, def){ const v = prompt(msg, def||''); return v===null ? null : v.replace(/[／/]/g,'・').trim(); }
+// ===== 1件ずつの追加・名前変更・削除 =====
+function ask(msg, def){ const v = prompt(msg, def||''); return v===null ? null : clean(v); }
 function addSurvey(){
   const g = ask('調査名（例：○○調査）'); if(g===null || !g) return;
-  const s = ask(`「${g}」の最初の工程名（例：踏査）`); if(s===null) return;
-  if(!s){ alert('工程名を入れてください。'); return; }
-  const l = loadList(); l.push({no:nextNo(), name:join(g,s)}); saveList(l);
-  setFold(g, false); render(); toast(`追加：${g} ＞ ${s}`);
+  const s = ask(`「${g}」の最初の工程名（例：踏査）\n空欄のままOKなら、工程なしの1つの対象になります`); if(s===null) return;
+  const r = mergeBulk([{g, kids: s ? [s] : []}], 'add');
+  if(!r.added.length){ alert('同じ名前の対象が既にあります。'); return; }
+  saveList(r.list); setFold(g, false); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
 }
 function addProc(g){
-  const s = ask(`「${g||'調査なし'}」に追加する工程名`); if(s===null || !s) return;
-  const l = loadList(); l.push({no:nextNo(), name:join(g,s)}); saveList(l);
-  render(); toast(`追加：${disp(join(g,s))}`);
+  const s = ask(`「${g}」に追加する工程名`); if(s===null || !s) return;
+  const r = mergeBulk([{g, kids:[s]}], 'add');
+  if(!r.added.length){ alert('同じ名前の工程が既にあります。'); return; }
+  saveList(r.list); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
 }
 function renameItem(no){
   const l = loadList(), b = l.find(x=>x.no===no); if(!b) return;
   const p = split(b.name);
-  if(p.g){   // 調査の中の工程：工程名だけ変える
-    const v = ask(`「${p.g}」の工程名を変更`, p.s); if(v===null || !v) return;
-    b.name = join(p.g, v);
-  }else{     // 調査なしの対象：「調査名／工程名」と入れれば調査にまとめる
-    const v = prompt('名前を変更（「調査名／工程名」と入れると調査ごとにまとめます）', p.s); if(v===null || !v.trim()) return;
-    const q = split(v); b.name = q.g ? join(q.g, q.s) : q.s;
-  }
-  saveList(l); render();
+  const v = ask(p.g ? `「${p.g}」の工程名を変更` : '名前を変更', p.s); if(v===null || !v) return;
+  b.name = join(p.g, v); saveList(l); render();
 }
 function renameGroup(g){
   const v = ask('調査名を変更', g); if(v===null || !v || v===g) return;
-  const l = loadList(); l.forEach(b=>{ const p = split(b.name); if(p.g===g) b.name = join(v, p.s); });
-  saveList(l); const f = folded(); if(f.has(g)) setFold(v, true); setFold(g, false); render();
+  const l = loadList();
+  if(l.some(b=> split(b.name).g===v)){ alert(`「${v}」は既にあります。`); return; }
+  l.forEach(b=>{ const p = split(b.name); if(p.g===g) b.name = join(v, p.s); });
+  saveList(l); if(folded().has(g)) setFold(v, true); setFold(g, false); render();
 }
 function delItems(nos, label){
-  const act = activeNo();
-  if(nos.includes(act)){ alert('実施中の対象は削除できません。先に「終了」してください。'); return; }
+  if(nos.includes(activeNo())){ alert('実施中の対象は削除できません。先に「終了」してください。'); return; }
   const used = nos.some(hasLog);
-  if(!confirm(`${label} を一覧から削除しますか？` + (used ? '\n\n※開始・終了の記録がある対象を含みます。記録は残り、写真の仕分けにもそのまま使われます。' : ''))) return;
+  if(!confirm(`${label} を一覧から削除しますか？` + (used ? '\n\n※開始・終了の記録がある対象を含みます。記録は残り、写真の仕分けにもそのまま使われます。' : '') +
+     '\n\n番号は詰めずに欠番になります（後日の仕分けで、同じ番号に別の対象が入らないようにするため）。')) return;
   saveList(loadList().filter(b=>!nos.includes(b.no))); render(); toast('削除しました');
 }
 
@@ -287,16 +387,16 @@ function workerBar(){
   return el;
 }
 
-function itemEl(b, act){
-  const p = split(b.name), sp = spans(b.no), run = b.no===act;
+function itemEl(b, act, log){
+  const p = split(b.name), sp = spans(b.no, log), run = b.no===act;
   const el = $(`<div class="item ${run?'run':''} ${sp.length&&!run?'done':''}">
-    <span class="no">No.${b.no}</span>
+    <span class="no">${codeOf(b)}</span>
     <div class="body"><div class="nm ${p.s?'':'empty'}">${esc(p.s||'（名前なし）')}</div>
       <div class="sp">${sp.length ? esc(sp.join('、')) : '未実施'}</div></div></div>`);
   if(EDIT){
     const r = $('<button class="ebtn">名前</button>'), d = $('<button class="ebtn del">削除</button>');
     r.onclick = ()=> renameItem(b.no);
-    d.onclick = ()=> delItems([b.no], `「${disp(b.name)}」`);
+    d.onclick = ()=> delItems([b.no], `「${codeOf(b)} ${disp(b.name)}」`);
     el.append(r, d);
   }else{
     const s = $(`<button class="sbtn ${run?'on':''}">${run?'■ 終了':'▶ 開始'}</button>`);
@@ -314,13 +414,13 @@ function render(){
   app.append(workerBar());
 
   if(EDIT){
-    const el = $(`<div class="now edit"><div class="txt"><b>編集中</b><br>名前の変更・削除ができます。調査名は見出しの「名前」「削除」で、まとめて変更・削除します。</div>
+    const el = $(`<div class="now edit"><div class="txt"><b>編集中</b><br>名前の変更・削除ができます。調査は見出しの「名前」「削除」で、工程ごとまとめて変更・削除します。</div>
       <button class="bigbtn done">完了</button></div>`);
     el.querySelector('button').onclick = ()=>{ EDIT=false; render(); };
     app.append(el);
   }else if(act!==null){
-    const st = [...log].reverse().find(x=>x.k==='s');
-    const el = $(`<div class="now run"><div class="txt">実施中<br><b>${esc(disp(nameOf(act)||st.n||''))}</b>　${hm(st.t)}〜</div>
+    const st = [...log].reverse().find(x=>x.k==='s'), b = itemOf(act);
+    const el = $(`<div class="now run"><div class="txt">実施中<br><b>${esc((b?codeOf(b):st.c||'')+'　'+disp(b?b.name:st.n||''))}</b>　${hm(st.t)}〜</div>
       <button class="bigbtn">■ 終了</button></div>`);
     el.querySelector('button').onclick = stop;
     app.append(el);
@@ -329,31 +429,39 @@ function render(){
   }
   app.append($(`<p class="summary">記録 ${log.length} 件 ／ 最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}</p>`));
 
-  // 調査ごとにまとめる（調査なしの対象は先頭に並べる）
-  const solo = [], groups = new Map();
-  for(const b of list){ const p = split(b.name); if(!p.g) solo.push(b); else{ if(!groups.has(p.g)) groups.set(p.g, []); groups.get(p.g).push(b); } }
+  // 番号順に、単独の対象と調査（工程のまとまり）を並べる
   const box = $('<div class="list"></div>');
   if(!list.length){
-    box.append($(`<div class="empty">対象がまだありません。<br>下の「＋ 調査を追加」で現地で追加するか、右上の「設定」で一覧を貼り付けてください。</div>`));
+    box.append($(`<div class="empty">対象がまだありません。<br>右上の「設定」→「リストをまとめて入力」で作るか、下の「＋ 調査を追加」で1件ずつ追加してください。</div>`));
   }
-  for(const b of solo) box.append(itemEl(b, act));
-  for(const [g, items] of groups){
-    const runHere = items.some(b=>b.no===act), done = items.filter(b=>spans(b.no).length).length;
+  const blocks = [];
+  for(const b of list){
+    const p = split(b.name);
+    if(!p.g){ blocks.push({pn:b.pn, solo:b}); continue; }
+    let blk = blocks.find(x=>x.g===p.g);
+    if(!blk){ blk = {pn:b.pn, g:p.g, items:[]}; blocks.push(blk); }
+    blk.items.push(b);
+  }
+  blocks.sort((a,b)=>a.pn-b.pn);
+  for(const blk of blocks){
+    if(blk.solo){ box.append(itemEl(blk.solo, act, log)); continue; }
+    const g = blk.g, items = blk.items.sort((a,b)=>a.cn-b.cn);
+    const runHere = items.some(b=>b.no===act), done = items.filter(b=>spans(b.no, log).length).length;
     const isFold = fold.has(g) && !runHere && !EDIT;
     const el = $(`<div class="grp ${isFold?'fold':''} ${runHere?'run':''}">
-      <div class="gh"><span class="arw">▼</span><span class="gn">${esc(g)}</span>
+      <div class="gh"><span class="arw">▼</span><span class="gno">${pad(blk.pn)}</span><span class="gn">${esc(g)}</span>
         <span class="gc">${runHere?'<b>実施中</b>　':''}${done}/${items.length} 実施</span></div>
       <div class="gbody"></div></div>`);
     const gh = el.querySelector('.gh'), body = el.querySelector('.gbody');
     if(EDIT){
       const r = $('<button class="ebtn">名前</button>'), d = $('<button class="ebtn del">削除</button>');
       r.onclick = (e)=>{ e.stopPropagation(); renameGroup(g); };
-      d.onclick = (e)=>{ e.stopPropagation(); delItems(items.map(b=>b.no), `調査「${g}」と工程 ${items.length} 件`); };
+      d.onclick = (e)=>{ e.stopPropagation(); delItems(items.map(b=>b.no), `調査「${pad(blk.pn)} ${g}」と工程 ${items.length} 件`); };
       gh.append(r, d);
     }else{
       gh.onclick = ()=>{ if(runHere) return; setFold(g, !fold.has(g)); render(); };
     }
-    for(const b of items) body.append(itemEl(b, act));
+    for(const b of items) body.append(itemEl(b, act, log));
     const add = $('<button class="addbtn">＋ 工程を追加</button>'); add.onclick = ()=> addProc(g);
     body.append(add);
     box.append(el);
@@ -369,9 +477,9 @@ document.getElementById('btnEdit').onclick = ()=>{ EDIT = !EDIT; render(); windo
 document.getElementById('btnUndo').onclick = ()=>{
   const l = loadLog(), x = l[l.length-1];
   if(!x){ alert('取り消す記録がありません。'); return; }
-  // 「別の対象を開始したときの自動終了」は開始と一緒に取り消す
   const y = l[l.length-2], pair = x.k==='s' && y && y.k==='e' && y.t===x.t;
-  const what = `${disp(nameOf(x.no)||x.n||'')} の${x.k==='s'?'開始':'終了'}（${hm(x.t)}）` + (pair ? `\nと、同時に記録した ${disp(nameOf(y.no)||y.n||'')} の終了` : '');
+  const nm = (r)=> disp(nameOf(r.no)||r.n||'');
+  const what = `${nm(x)} の${x.k==='s'?'開始':'終了'}（${hm(x.t)}）` + (pair ? `\nと、同時に記録した ${nm(y)} の終了` : '');
   if(!confirm(`${what}\nを取り消しますか？`)) return;
   l.pop(); if(pair) l.pop(); saveLog(l); render(); toast('取り消しました');
 };
@@ -387,14 +495,17 @@ function tick(){
 document.getElementById('btnClock').onclick = ()=>{ tick(); ck.classList.add('show'); ckTimer = setInterval(tick, 200); };
 document.getElementById('ckClose').onclick = ()=>{ ck.classList.remove('show'); clearInterval(ckTimer); };
 
-// ===== 記録を保存（CSV）。列はv1と同じ（マクロはそのまま） =====
+// ===== 記録を保存（CSV）。6列目に番号（01／01-01）を追加。マクロは番号でフォルダを作る =====
 async function exportCsv(){
   const log = loadLog();
   if(!log.length){ alert('保存する記録がありません。'); return; }
   if(activeNo()!==null && !confirm(`${disp(nameOf(activeNo()))} がまだ実施中です（終了していません）。\nこのまま保存しますか？`)) return;
-  const names = new Map(loadList().map(b=>[b.no,b.name]));
-  // 名前は今の一覧を優先。一覧から削除した対象は、記録したときの名前を使う
-  const rows = [['No','対象名','種別','日時','作業者'], ...log.map(x=>[x.no, names.get(x.no)||x.n||'', x.k==='s'?'開始':'終了', fmtDT(x.t), x.w||''])];
+  const items = new Map(loadList().map(b=>[b.no,b]));
+  // 名前・番号は今の一覧を優先。一覧から削除した対象は、記録したときのものを使う
+  const rows = [['No','対象名','種別','日時','作業者','番号'], ...log.map(x=>{
+    const b = items.get(x.no);
+    return [x.no, b ? b.name : (x.n||''), x.k==='s'?'開始':'終了', fmtDT(x.t), x.w||'', b ? codeOf(b) : (x.c||'')];
+  })];
   const csv = '﻿' + rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n') + '\r\n';
   const d = new Date(), stamp = `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`;
   const safe = gName().replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40) || 'gyomu';
@@ -413,35 +524,61 @@ async function exportCsv(){
 }
 document.getElementById('btnExport').onclick = exportCsv;
 
+// ===== まとめて入力 =====
+const dlgB = document.getElementById('dlgBulk'), taB = document.getElementById('taBulk'), pvB = document.getElementById('pvBulk');
+function preview(){
+  const parsed = parseBulk(taB.value);
+  if(!parsed.length){ pvB.textContent = '（入力するとここに表示されます）'; return; }
+  const r = mergeBulk(parsed, 'add');
+  pvB.innerHTML = treeText(r.list, r.added);
+}
+taB.addEventListener('input', preview);
+function openBulk(){ dlgS.close(); preview(); dlgB.showModal(); }
+document.getElementById('btnOpenBulk').onclick = openBulk;
+document.getElementById('btnBulkClose').onclick = ()=> dlgB.close();
+document.getElementById('btnLoadCur').onclick = ()=>{ taB.value = toIndent(loadList()); preview(); };
+document.getElementById('btnClearBulk').onclick = ()=>{ taB.value = ''; preview(); };
+document.getElementById('btnBulkAdd').onclick = ()=>{
+  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  const r = mergeBulk(parsed, 'add');
+  if(!r.added.length){ alert('新しく増える対象はありません（すべて既にあります）。'); return; }
+  saveList(r.list); dlgB.close(); render(); toast(`${r.added.length} 件を追加しました`);
+};
+document.getElementById('btnBulkReplace').onclick = ()=>{
+  const parsed = parseBulk(taB.value); if(!parsed.length){ alert('入力がありません。'); return; }
+  if(activeNo()!==null){ alert('実施中の対象があります。先に「終了」してから置き換えてください。'); return; }
+  const r = mergeBulk(parsed, 'replace');
+  const n = loadList().length, logged = loadLog().length;
+  if(n && !confirm(`今のリスト（${n} 件）を、入力した ${r.list.length} 件に置き換えます。\n番号は 01 から振り直します。` +
+     (logged ? '\n\n※今日の記録がある場合は、置き換える前に「記録を保存」しておいてください（番号が変わるため）。' : '') + '\n\nよろしいですか？')) return;
+  saveList(r.list); dlgB.close(); render(); toast(`${r.list.length} 件のリストにしました`);
+};
+
 // ===== 設定 =====
-const dlg = document.getElementById('dlgSettings');
+const dlgS = document.getElementById('dlgSettings');
 document.getElementById('btnSettings').onclick = ()=>{
   document.getElementById('inName').value = gName();
-  document.getElementById('taList').value = loadList().map(b=>b.no+'\t'+b.name).join('\n');
   const n = loadLog().length, last = localStorage.getItem(LS.exp);
   document.getElementById('logInfo').textContent = `記録 ${n} 件（最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}）。` +
     '次の業務を始める前に、「記録を保存」してPCへ渡してから消去してください。';
-  dlg.showModal();
+  dlgS.showModal();
 };
-document.getElementById('btnCloseSet').onclick = ()=> dlg.close();
-document.getElementById('btnSaveSet').onclick = ()=>{
+document.getElementById('btnCloseSet').onclick = ()=> dlgS.close();
+document.getElementById('btnSaveName').onclick = ()=>{
   const nm = document.getElementById('inName').value.trim();
   nm ? localStorage.setItem(LS.name, nm) : localStorage.removeItem(LS.name);
-  const t = document.getElementById('taList').value.trim();
-  if(!t) saveList([]);
-  else{ const l = parseList(t); if(!l.length){ alert('リストを読み取れませんでした。'); return; } saveList(l); }
-  dlg.close(); render(); toast('保存しました');
+  render(); toast('業務名を保存しました');
 };
 document.getElementById('btnClearLog').onclick = ()=>{
   const n = loadLog().length, last = +(localStorage.getItem(LS.exp)||0), lastT = n ? loadLog()[n-1].t : 0;
   if(!n){ alert('記録はありません。'); return; }
   const unsaved = !last || last < lastT;
   if(!confirm(`開始・終了の記録 ${n} 件を消去します。` + (unsaved ? '\n※最後の記録のあと、まだ「記録を保存」していません。' : '') + '\nよろしいですか？')) return;
-  localStorage.removeItem(LS.log); localStorage.removeItem(LS.exp); dlg.close(); render(); toast('記録を消去しました');
+  localStorage.removeItem(LS.log); localStorage.removeItem(LS.exp); dlgS.close(); render(); toast('記録を消去しました');
 };
 
 render();
-document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && !dlg.open) render(); });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && !dlgS.open && !dlgB.open) render(); });
 
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
