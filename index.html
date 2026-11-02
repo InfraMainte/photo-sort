@@ -167,7 +167,7 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
   </div>
   <div class="tab-panel active" id="pTbl">
     <div class="twrap"><table class="ftbl">
-      <thead><tr><th class="c-no">#</th><th>調査名（親）</th><th>工程名（子）<span class="th-hint">空欄なら親だけの対象</span></th><th class="c-del"></th></tr></thead>
+      <thead><tr><th class="c-no">#</th><th>グループ（親フォルダ）</th><th>項目（子フォルダ）<span class="th-hint">空欄ならグループだけで1つ</span></th><th class="c-del"></th></tr></thead>
       <tbody id="tbB"></tbody>
     </table></div>
     <div class="btn-group">
@@ -179,11 +179,11 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
   </div>
   <div class="tab-panel" id="pTxt">
     <div class="hint">
-      <b>Excel貼り付け</b>：A列＝調査名、B列＝工程名（A列が空の行は上の調査の続き。B列は「,」で複数可）。見出し行は入れずにコピー<br>
-      <b>インデント</b>：調査名の行の下に、工程名を<b>行頭に空白か「・」</b>を付けて書く<br>
-      工程のない行は、それだけで1つの対象になります。
+      <b>Excelの「リスト入力」シート</b>：E6のセルをコピーして、そのまま貼り付け<br><b>Excelの表を直接</b>：A列＝グループ、B列＝項目（A列が空の行は上のグループの続き）。見出し行は入れずにコピー<br>
+      <b>インデント</b>：グループの行の下に、項目を<b>行頭に空白か「・」</b>を付けて書く<br>
+      項目のないグループは、それだけで1つの対象になります。組み合わせは自由（調査と工程、橋梁と部位、工種と測点など）。
     </div>
-    <textarea id="taBulk" placeholder="○○調査&#10;・踏査&#10;・計測&#10;△△調査&#10;・採取&#10;単独の対象"></textarea>
+    <textarea id="taBulk" placeholder="グループA&#10;・項目1&#10;・項目2&#10;グループB&#10;グループC&#10;・項目1"></textarea>
     <div class="btn-group">
       <button class="btn2 btn-clear" id="btnClearBulk">🗑 欄を空にする</button>
       <button class="btn2 btn-add" id="btnTxtToTbl">表に移す</button>
@@ -201,11 +201,11 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}
 <dialog id="dlgSettings"><div class="dlg">
   <h2>業務名</h2>
   <p>保存する記録のファイル名に入ります。</p>
-  <input type="text" id="inName" placeholder="例：R7○○調査">
+  <input type="text" id="inName" placeholder="例：R7○○業務">
   <div class="row"><button class="btn primary" id="btnSaveName">業務名を保存</button></div>
   <hr>
   <h2>対象リスト</h2>
-  <p>調査（親）と工程（子）のリストを、インデントかExcelの貼り付けでまとめて作れます。<br>1件ずつの追加・削除は、一覧の「＋」と右上の「編集」で。</p>
+  <p>グループ（親フォルダ）と項目（子フォルダ）のリストを、表・Excelの貼り付け・インデントでまとめて作れます。<br>1件ずつの追加・削除は、一覧の「＋」と右上の「編集」で。</p>
   <div class="row" style="justify-content:flex-start;margin-top:4px"><button class="btn primary" id="btnOpenBulk">リストをまとめて入力</button></div>
   <hr>
   <h2>開始・終了の記録</h2>
@@ -281,6 +281,9 @@ const itemOf = (no)=> loadList().find(x=>x.no===no);
 // 戻り値：[{g:'調査名', kids:['工程',…]}]（kidsが空なら、調査名だけの単独の対象）
 function parseBulk(text){
   const out = []; let cur = null;
+  // Excelで改行入りのセルをコピーすると、全体が "…" で囲まれ、中の " は "" になる
+  text = String(text).replace(/^\s+|\s+$/g, '');
+  if(/^"[\s\S]*"$/.test(text)) text = text.slice(1, -1).replace(/""/g, '"');
   const names = (s)=> s.split(/[\t,，]/).map(clean).filter(Boolean);
   for(const raw of String(text).split(/\r?\n/)){
     if(!raw.trim()) continue;
@@ -378,26 +381,26 @@ function stop(){
 // ===== 1件ずつの追加・名前変更・削除 =====
 function ask(msg, def){ const v = prompt(msg, def||''); return v===null ? null : clean(v); }
 function addSurvey(){
-  const g = ask('調査名（例：○○調査）'); if(g===null || !g) return;
-  const s = ask(`「${g}」の最初の工程名（例：踏査）\n空欄のままOKなら、工程なしの1つの対象になります`); if(s===null) return;
+  const g = ask('グループ名（例：調査名・橋梁名・工種など）'); if(g===null || !g) return;
+  const s = ask(`「${g}」の最初の項目名（例：工程・部位・測点など）\n空欄のままOKなら、項目なしの1つの対象になります`); if(s===null) return;
   const r = mergeBulk([{g, kids: s ? [s] : []}], 'add');
   if(!r.added.length){ alert('同じ名前の対象が既にあります。'); return; }
   saveList(r.list); setFold(g, false); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
 }
 function addProc(g){
-  const s = ask(`「${g}」に追加する工程名`); if(s===null || !s) return;
+  const s = ask(`「${g}」に追加する項目名`); if(s===null || !s) return;
   const r = mergeBulk([{g, kids:[s]}], 'add');
-  if(!r.added.length){ alert('同じ名前の工程が既にあります。'); return; }
+  if(!r.added.length){ alert('同じ名前の項目が既にあります。'); return; }
   saveList(r.list); render(); toast(`追加：${codeOf(r.added[0])} ${disp(r.added[0].name)}`);
 }
 function renameItem(no){
   const l = loadList(), b = l.find(x=>x.no===no); if(!b) return;
   const p = split(b.name);
-  const v = ask(p.g ? `「${p.g}」の工程名を変更` : '名前を変更', p.s); if(v===null || !v) return;
+  const v = ask(p.g ? `「${p.g}」の項目名を変更` : '名前を変更', p.s); if(v===null || !v) return;
   b.name = join(p.g, v); saveList(l); render();
 }
 function renameGroup(g){
-  const v = ask('調査名を変更', g); if(v===null || !v || v===g) return;
+  const v = ask('グループ名を変更', g); if(v===null || !v || v===g) return;
   const l = loadList();
   if(l.some(b=> split(b.name).g===v)){ alert(`「${v}」は既にあります。`); return; }
   l.forEach(b=>{ const p = split(b.name); if(p.g===g) b.name = join(v, p.s); });
@@ -464,7 +467,7 @@ function render(){
   app.append(workerBar());
 
   if(EDIT){
-    const el = $(`<div class="now edit"><div class="txt"><b>編集中</b><br>名前の変更・削除ができます。調査は見出しの「名前」「削除」で、工程ごとまとめて変更・削除します。</div>
+    const el = $(`<div class="now edit"><div class="txt"><b>編集中</b><br>名前の変更・削除ができます。グループは見出しの「名前」「削除」で、項目ごとまとめて変更・削除します。</div>
       <button class="bigbtn done">完了</button></div>`);
     el.querySelector('button').onclick = ()=>{ EDIT=false; render(); };
     app.append(el);
@@ -482,7 +485,7 @@ function render(){
   // 番号順に、単独の対象と調査（工程のまとまり）を並べる
   const box = $('<div class="list"></div>');
   if(!list.length){
-    box.append($(`<div class="empty">対象がまだありません。<br>右上の「設定」→「リストをまとめて入力」で作るか、下の「＋ 調査を追加」で1件ずつ追加してください。</div>`));
+    box.append($(`<div class="empty">対象がまだありません。<br>右上の「設定」→「リストをまとめて入力」で作るか、下の「＋ グループを追加」で1件ずつ追加してください。</div>`));
   }
   const blocks = [];
   for(const b of list){
@@ -506,17 +509,17 @@ function render(){
     if(EDIT){
       const r = $('<button class="ebtn">名前</button>'), d = $('<button class="ebtn del">削除</button>');
       r.onclick = (e)=>{ e.stopPropagation(); renameGroup(g); };
-      d.onclick = (e)=>{ e.stopPropagation(); delItems(items.map(b=>b.no), `調査「${pad(blk.pn)} ${g}」と工程 ${items.length} 件`); };
+      d.onclick = (e)=>{ e.stopPropagation(); delItems(items.map(b=>b.no), `グループ「${pad(blk.pn)} ${g}」と項目 ${items.length} 件`); };
       gh.append(r, d);
     }else{
       gh.onclick = ()=>{ if(runHere) return; setFold(g, !fold.has(g)); render(); };
     }
     for(const b of items) body.append(itemEl(b, act, log));
-    const add = $('<button class="addbtn">＋ 工程を追加</button>'); add.onclick = ()=> addProc(g);
+    const add = $('<button class="addbtn">＋ 項目を追加</button>'); add.onclick = ()=> addProc(g);
     body.append(add);
     box.append(el);
   }
-  const addS = $('<button class="addbtn big">＋ 調査を追加</button>'); addS.onclick = addSurvey;
+  const addS = $('<button class="addbtn big">＋ グループを追加</button>'); addS.onclick = addSurvey;
   box.append(addS);
   app.append(box);
 }
@@ -612,7 +615,7 @@ function renderTable(focus){
   tbB.innerHTML = '';
   TB.forEach((r, i)=>{
     const tr = $(`<tr><td class="c-no">${i+1}</td>
-      <td><input class="l1-input" placeholder="例：○○調査" enterkeyhint="next" value="${esc(r.g)}"></td>
+      <td><input class="l1-input" placeholder="例：グループA" enterkeyhint="next" value="${esc(r.g)}"></td>
       <td class="kids"></td>
       <td class="c-del"><button class="del-btn" aria-label="行を削除">✕</button></td></tr>`);
     const l1 = tr.querySelector('.l1-input'), kc = tr.querySelector('.kids');
@@ -620,8 +623,8 @@ function renderTable(focus){
     l1.onkeydown = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); kc.querySelector('.l2-input')?.focus(); } };
     r.kids.forEach((k, j)=>{
       const row = $(`<div class="l2-row"><span class="l2-grip"></span>
-        <input class="l2-input" placeholder="工程名" enterkeyhint="next" value="${esc(k)}">
-        <button class="item-del" aria-label="工程を削除">✕</button></div>`);
+        <input class="l2-input" placeholder="項目名" enterkeyhint="next" value="${esc(k)}">
+        <button class="item-del" aria-label="項目を削除">✕</button></div>`);
       const inp = row.querySelector('input');
       inp.oninput = ()=>{ r.kids[j] = inp.value; preview(); };
       // Enterで次の工程欄へ（最後の欄なら1つ増やす）
@@ -636,11 +639,11 @@ function renderTable(focus){
       };
       kc.append(row);
     });
-    const add = $('<button class="add-btn">＋ 工程を追加</button>');
+    const add = $('<button class="add-btn">＋ 項目を追加</button>');
     add.onclick = ()=>{ r.kids.push(''); renderTable({i, j:r.kids.length-1}); };
     kc.append(add);
     tr.querySelector('.del-btn').onclick = ()=>{
-      if((r.g.trim() || r.kids.some(k=>k.trim())) && !confirm(`${i+1}行目（${r.g.trim()||'調査名なし'}）を表から消しますか？`)) return;
+      if((r.g.trim() || r.kids.some(k=>k.trim())) && !confirm(`${i+1}行目（${r.g.trim()||'グループ名なし'}）を表から消しますか？`)) return;
       TB.splice(i,1); if(!TB.length) TB = blankRows(1);
       renderTable(); preview();
     };
