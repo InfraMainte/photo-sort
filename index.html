@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="写真仕分け">
+<meta name="theme-color" content="#14532d">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>写真仕分け</title>
+<style>
+:root{
+  --bg:#eef2ef; --panel:#fff; --ink:#17211b; --sub:#5a6860; --line:#cdd8d1;
+  --head:#14532d; --accent:#f2b705; --run:#c0392b; --ok:#2e8b57; --warn:#c0392b;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--head);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:19px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header h1 small{font-size:13px;font-weight:500;opacity:.8;margin-left:8px}
+.hbtn{background:#21703f;color:#fff;border:0;border-radius:10px;padding:11px 14px;font-size:16px;font-weight:600}
+main{padding:14px 16px;max-width:900px;margin:0 auto}
+.worker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:10px 14px;margin:0 0 12px}
+.worker b{font-size:16px}
+.worker select,.worker input{font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:#fff;color:var(--ink);font-family:inherit}
+.worker input{width:11em}
+.worker.none{border:2px solid var(--warn)}
+.worker .wmsg{color:var(--warn);font-size:14px;font-weight:600}
+.now{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-radius:14px;padding:14px 16px;margin:0 0 14px;
+  background:#fff;border:1px solid var(--line)}
+.now.run{background:#fdecea;border:2px solid var(--run)}
+.now .txt{flex:1;min-width:200px;font-size:15px;color:var(--sub);line-height:1.5}
+.now.run .txt{color:var(--ink)}
+.now .txt b{font-size:19px;color:var(--ink)}
+.bigbtn{border:0;border-radius:12px;padding:15px 20px;font-size:18px;font-weight:700;color:#fff;background:var(--run)}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.item.run{border:2px solid var(--run);background:#fff7f6}
+.item.done{border-color:#9cc9ad}
+.item .no{font-size:20px;font-weight:700;min-width:3.2em}
+.item .body{flex:1;min-width:0}
+.item .nm{font-size:17px;font-weight:600;background:none;border:0;padding:0;color:inherit;text-align:left;font-family:inherit;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
+.item .nm.empty{color:var(--sub);font-weight:500}
+.item .sp{font-size:13px;color:var(--sub);margin-top:3px;line-height:1.4}
+.item.done .sp{color:var(--ok);font-weight:600}
+.sbtn{border:0;border-radius:12px;padding:14px 18px;font-size:17px;font-weight:700;color:#fff;background:var(--ok);min-width:6.5em}
+.sbtn.on{background:var(--run)}
+.addbtn{border:2px dashed #9fb3a6;background:transparent;border-radius:12px;padding:14px;font-size:16px;font-weight:600;color:var(--sub);width:100%;margin-top:4px}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}
+.fbtn{flex:1;max-width:260px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 8px;font-size:16px;font-weight:700;color:var(--ink)}
+.fbtn.pri{background:var(--accent);border-color:var(--accent);color:#1b1b1b}
+.summary{color:var(--sub);font-size:14px;margin:0 0 10px}
+dialog{border:0;border-radius:16px;padding:0;width:min(640px,94vw);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:20px}
+.dlg h2{margin:0 0 6px;font-size:19px}
+.dlg p{color:var(--sub);font-size:14px;margin:6px 0 10px;line-height:1.6}
+.dlg input[type=text]{width:100%;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit}
+textarea{width:100%;height:200px;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;color:var(--ink)}
+.btn.primary{background:var(--head);color:#fff;border-color:var(--head)}
+.btn.danger{color:var(--warn);border-color:#e3b2ac}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+#clock{position:fixed;inset:0;z-index:50;background:#000;color:#fff;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+#clock.show{display:flex}
+#clock .d{font-size:clamp(28px,6vw,54px);font-weight:600;letter-spacing:.04em}
+#clock .t{font-size:clamp(70px,19vw,200px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1}
+#clock .h{font-size:16px;color:#bbb;line-height:1.7;max-width:640px}
+#clock button{margin-top:10px;border:0;border-radius:12px;padding:14px 26px;font-size:18px;font-weight:700;background:#333;color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:#17211b;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>写真仕分け<small id="gname"></small></h1>
+  <button class="hbtn" id="btnSettings">設定</button>
+</header>
+<main id="app"></main>
+<div class="foot">
+  <button class="fbtn" id="btnClock">時計を表示</button>
+  <button class="fbtn" id="btnUndo">直前を取消</button>
+  <button class="fbtn pri" id="btnExport">記録を保存</button>
+</div>
+
+<div id="clock">
+  <div class="d" id="ckD"></div>
+  <div class="t" id="ckT"></div>
+  <div class="h">デジカメでこの画面を1枚撮影してください（その日の最初に1回）。<br>
+    PCで仕分けるとき、この写真でカメラの時計のずれを補正できます。</div>
+  <button id="ckClose">閉じる</button>
+</div>
+
+<dialog id="dlgSettings"><div class="dlg">
+  <h2>業務名</h2>
+  <p>保存する記録のファイル名に入ります。</p>
+  <input type="text" id="inName" placeholder="例：R7○○法面調査">
+  <hr>
+  <h2>対象リスト</h2>
+  <p>1行に「No（タブ／カンマ／空白）名前」。名前だけの行は番号を自動で付けます。<br>
+     Excelの一覧からNo列と名前列をコピーして貼り付けられます。現地で増えた分は一覧の「＋ 対象を追加」から。</p>
+  <textarea id="taList" placeholder="1&#9;○○法面&#10;2&#9;△△集水桝"></textarea>
+  <div class="row">
+    <button class="btn" id="btnCloseSet">閉じる</button>
+    <button class="btn primary" id="btnSaveSet">保存</button>
+  </div>
+  <hr>
+  <h2>開始・終了の記録</h2>
+  <p id="logInfo">—</p>
+  <div class="row">
+    <button class="btn danger" id="btnClearLog">記録をすべて消去</button>
+  </div>
+</div></dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+// ===== 設定 =====
+// 保存キーは踏査写真アプリ（tousa.*）と別名にする
+const LS = { name:'psort.name', list:'psort.list', log:'psort.log', worker:'psort.worker', exp:'psort.lastExport' };
+const WORKERS = ['青木','髙原','山口','赤池'];   // 候補以外は「その他（入力）」
+const DEFAULT_COUNT = 10;
+
+// ===== 保存 =====
+const ls = {
+  get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)||'null'); return v ?? d; }catch(e){ return d; } },
+  set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+};
+const gName = ()=> (localStorage.getItem(LS.name)||'').trim();
+const getWorker = ()=> (localStorage.getItem(LS.worker)||'').trim();
+function setWorker(v){ v=(v||'').trim(); v ? localStorage.setItem(LS.worker,v) : localStorage.removeItem(LS.worker); }
+function loadList(){
+  const v = ls.get(LS.list, null);
+  if(Array.isArray(v) && v.length) return v;
+  return Array.from({length:DEFAULT_COUNT},(_,i)=>({no:i+1,name:''}));
+}
+function saveList(l){ l.sort((a,b)=>a.no-b.no); ls.set(LS.list, l); }
+const loadLog = ()=>{ const v = ls.get(LS.log, []); return Array.isArray(v) ? v : []; };
+const saveLog = (l)=> ls.set(LS.log, l);
+// 実施中の対象（最後の記録が「開始」ならそのNo）
+function activeNo(){ const l = loadLog(), x = l[l.length-1]; return x && x.k==='s' ? x.no : null; }
+
+function parseList(text){
+  const out=[]; let seq=0;
+  for(const raw of text.split(/\r?\n/)){
+    const line = raw.trim(); if(!line) continue;
+    const m = line.match(/^(\d{1,4})[\t,，\s　]+(.*)$/);
+    if(m){ out.push({no:+m[1], name:m[2].trim()}); seq=+m[1]; }
+    else if(/^\d{1,4}$/.test(line)){ out.push({no:+line,name:''}); seq=+line; }
+    else if(!/^(No|例)/i.test(line)){ seq++; out.push({no:seq,name:line}); }
+  }
+  const seen=new Set(); return out.filter(b=> b.no>0 && !seen.has(b.no) && seen.add(b.no));
+}
+
+// ===== 時刻 =====
+const z = (n)=>String(n).padStart(2,'0');
+const hm = (t)=>{ const d=new Date(t); return z(d.getHours())+':'+z(d.getMinutes()); };
+function fmtDT(t){ const d=new Date(t); return `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; }
+// その対象の実施時間帯（例：10:05〜10:40、11:30〜実施中）
+function spans(no){
+  const out=[]; let cur=null;
+  for(const x of loadLog()){
+    if(x.k==='s' && x.no===no){ if(cur!==null) out.push(hm(cur)+'〜'); cur=x.t; }
+    else if(cur!==null){ out.push(hm(cur)+'〜'+hm(x.t)); cur=null; }
+  }
+  if(cur!==null) out.push(hm(cur)+'〜実施中');
+  return out;
+}
+
+// ===== 開始・終了 =====
+function start(no){
+  if(!getWorker()){ alert('作業者が選ばれていません。\n画面上の「作業者」で選んでから開始してください。'); return; }
+  const l = loadLog(), t = Date.now(), act = activeNo(), w = getWorker();
+  if(act!==null) l.push({no:act, t, k:'e', w});      // 別の対象を実施中なら、同じ時刻で終了させる
+  l.push({no, t, k:'s', w}); saveLog(l);
+  toast(`No.${no} 開始 ${hm(t)}` + (act!==null ? `（No.${act} は終了）` : ''));
+  render();
+}
+function stop(){
+  const act = activeNo(); if(act===null) return;
+  const l = loadLog(), t = Date.now(); l.push({no:act, t, k:'e', w:getWorker()}); saveLog(l);
+  toast(`No.${act} 終了 ${hm(t)}`); render();
+}
+
+// ===== 画面 =====
+const app = document.getElementById('app');
+const $ = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstElementChild;};
+const esc = (s)=> String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
+const nameOf = (no)=>{ const b = loadList().find(x=>x.no===no); return b ? b.name : ''; };
+
+function workerBar(){
+  const w = getWorker(), other = !!w && !WORKERS.includes(w);
+  const el = $(`<div class="worker"><b>作業者</b>
+    <select aria-label="作業者"><option value="">選択してください</option>
+      ${WORKERS.map(n=>`<option value="${esc(n)}" ${n===w?'selected':''}>${esc(n)}</option>`).join('')}
+      <option value="*" ${other?'selected':''}>その他（入力）</option></select>
+    <input type="text" placeholder="名前を入力" value="${other?esc(w):''}" ${other?'':'hidden'} enterkeyhint="done">
+    <span class="wmsg"></span></div>`);
+  const sel = el.querySelector('select'), inp = el.querySelector('input'), msg = el.querySelector('.wmsg');
+  const refresh = ()=>{ const v=getWorker(); el.classList.toggle('none',!v); msg.textContent = v ? '' : '作業者を選んでから開始してください'; };
+  sel.onchange = ()=>{
+    if(sel.value==='*'){ inp.hidden=false; inp.value=''; setWorker(''); inp.focus(); }
+    else{ inp.hidden=true; setWorker(sel.value); if(sel.value) toast(`作業者：${sel.value}`); }
+    refresh();
+  };
+  inp.oninput = ()=>{ setWorker(inp.value); refresh(); };
+  refresh();
+  return el;
+}
+
+function render(){
+  document.getElementById('gname').textContent = gName();
+  const list = loadList(), act = activeNo(), log = loadLog(), last = localStorage.getItem(LS.exp);
+  app.innerHTML = '';
+  app.append(workerBar());
+
+  // 実施中の表示
+  if(act!==null){
+    const nm = nameOf(act), st = [...log].reverse().find(x=>x.k==='s');
+    const el = $(`<div class="now run"><div class="txt">実施中<br><b>No.${act}　${esc(nm||'（名前なし）')}</b>　${hm(st.t)}〜</div>
+      <button class="bigbtn">■ 終了</button></div>`);
+    el.querySelector('button').onclick = stop;
+    app.append(el);
+  }else{
+    app.append($(`<div class="now"><div class="txt">着いたら「開始」、離れるときに「終了」。<br>デジカメはその日の最初に「時計を表示」を1枚撮影。</div></div>`));
+  }
+  app.append($(`<p class="summary">記録 ${log.length} 件 ／ 最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}</p>`));
+
+  const box = $('<div class="list"></div>');
+  for(const b of list){
+    const sp = spans(b.no), run = b.no===act;
+    const el = $(`<div class="item ${run?'run':''} ${sp.length&&!run?'done':''}">
+      <span class="no">No.${b.no}</span>
+      <div class="body"><button class="nm ${b.name?'':'empty'}">${esc(b.name||'名前を入力 ✎')}</button>
+        <div class="sp">${sp.length ? esc(sp.join('、')) : '未実施'}</div></div>
+      <button class="sbtn ${run?'on':''}">${run?'■ 終了':'▶ 開始'}</button></div>`);
+    el.querySelector('.sbtn').onclick = ()=> run ? stop() : start(b.no);
+    el.querySelector('.nm').onclick = ()=>{
+      const v = prompt(`No.${b.no} の名前`, b.name||''); if(v===null) return;
+      const l = loadList(), x = l.find(y=>y.no===b.no); if(x){ x.name=v.trim(); saveList(l); } render();
+    };
+    box.append(el);
+  }
+  const add = $('<button class="addbtn">＋ 対象を追加</button>');
+  add.onclick = ()=>{
+    const l = loadList(), next = l.reduce((m,b)=>Math.max(m,b.no),0)+1;
+    const name = prompt(`No.${next} の名前（現地で追加する対象）`, ''); if(name===null) return;
+    l.push({no:next, name:name.trim()}); saveList(l); render();
+  };
+  box.append(add);
+  app.append(box);
+}
+
+// ===== 直前の取消 =====
+document.getElementById('btnUndo').onclick = ()=>{
+  const l = loadLog(), x = l[l.length-1];
+  if(!x){ alert('取り消す記録がありません。'); return; }
+  // 「別の対象を開始したときの自動終了」は開始と一緒に取り消す
+  const y = l[l.length-2], pair = x.k==='s' && y && y.k==='e' && y.t===x.t;
+  const what = `No.${x.no} の${x.k==='s'?'開始':'終了'}（${hm(x.t)}）` + (pair ? `\nと、同時に記録した No.${y.no} の終了` : '');
+  if(!confirm(`${what}\nを取り消しますか？`)) return;
+  l.pop(); if(pair) l.pop(); saveLog(l); render(); toast('取り消しました');
+};
+
+// ===== 時計（デジカメの時計合わせ用） =====
+const ck = document.getElementById('clock'); let ckTimer = null;
+const WD = ['日','月','火','水','木','金','土'];
+function tick(){
+  const d = new Date();
+  document.getElementById('ckD').textContent = `${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())}（${WD[d.getDay()]}）`;
+  document.getElementById('ckT').textContent = `${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
+}
+document.getElementById('btnClock').onclick = ()=>{ tick(); ck.classList.add('show'); ckTimer = setInterval(tick, 200); };
+document.getElementById('ckClose').onclick = ()=>{ ck.classList.remove('show'); clearInterval(ckTimer); };
+
+// ===== 記録を保存（CSV） =====
+async function exportCsv(){
+  const log = loadLog();
+  if(!log.length){ alert('保存する記録がありません。'); return; }
+  if(activeNo()!==null && !confirm(`No.${activeNo()} がまだ実施中です（終了していません）。\nこのまま保存しますか？`)) return;
+  const names = new Map(loadList().map(b=>[b.no,b.name]));
+  const rows = [['No','対象名','種別','日時','作業者'], ...log.map(x=>[x.no, names.get(x.no)||'', x.k==='s'?'開始':'終了', fmtDT(x.t), x.w||''])];
+  const csv = '﻿' + rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n') + '\r\n';
+  const d = new Date(), stamp = `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`;
+  const safe = gName().replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40) || 'gyomu';
+  const fname = `${safe}_仕分け記録_${stamp}.csv`;
+  const file = new File([csv], fname, {type:'text/csv'});
+  try{
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:fname});
+    }else{
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = fname;
+      document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+    }
+    localStorage.setItem(LS.exp, String(Date.now()));
+    toast(`記録 ${log.length} 件を保存しました`); render();
+  }catch(e){ if(e && e.name!=='AbortError') alert('保存に失敗しました：' + e.message); }
+}
+document.getElementById('btnExport').onclick = exportCsv;
+
+// ===== 設定 =====
+const dlg = document.getElementById('dlgSettings');
+document.getElementById('btnSettings').onclick = ()=>{
+  document.getElementById('inName').value = gName();
+  const v = ls.get(LS.list, null);
+  document.getElementById('taList').value = Array.isArray(v) ? v.map(b=>b.no+'\t'+b.name).join('\n') : '';
+  const n = loadLog().length, last = localStorage.getItem(LS.exp);
+  document.getElementById('logInfo').textContent = `記録 ${n} 件（最終保存：${last?new Date(+last).toLocaleString('ja-JP'):'未保存'}）。` +
+    '次の業務を始める前に、「記録を保存」してPCへ渡してから消去してください。';
+  dlg.showModal();
+};
+document.getElementById('btnCloseSet').onclick = ()=> dlg.close();
+document.getElementById('btnSaveSet').onclick = ()=>{
+  const nm = document.getElementById('inName').value.trim();
+  nm ? localStorage.setItem(LS.name, nm) : localStorage.removeItem(LS.name);
+  const t = document.getElementById('taList').value.trim();
+  if(!t) localStorage.removeItem(LS.list);
+  else{ const l = parseList(t); if(!l.length){ alert('リストを読み取れませんでした。'); return; } saveList(l); }
+  dlg.close(); render(); toast('保存しました');
+};
+document.getElementById('btnClearLog').onclick = ()=>{
+  const n = loadLog().length, last = +(localStorage.getItem(LS.exp)||0), lastT = n ? loadLog()[n-1].t : 0;
+  if(!n){ alert('記録はありません。'); return; }
+  const unsaved = !last || last < lastT;
+  if(!confirm(`開始・終了の記録 ${n} 件を消去します。` + (unsaved ? '\n※最後の記録のあと、まだ「記録を保存」していません。' : '') + '\nよろしいですか？')) return;
+  localStorage.removeItem(LS.log); localStorage.removeItem(LS.exp); dlg.close(); render(); toast('記録を消去しました');
+};
+
+render();
+// 他の画面から戻ったとき（時刻表示などを最新に）
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) render(); });
+
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+</script>
+</body>
+</html>
