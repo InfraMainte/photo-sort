@@ -1,12 +1,11 @@
-// 写真仕分け：オフライン用キャッシュ（更新時は VERSION を上げる。踏査写真アプリとは別名）
-const VERSION = 'photo-sort-v4';
+// 踏査写真：オフライン用キャッシュ（更新時は VERSION を上げる）
+const VERSION = 'tousa-photo-v9';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  // このアプリ（photo-sort-）の古いキャッシュだけを消す
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('photo-sort-') && k !== VERSION).map(k => caches.delete(k))))
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 // 通信できればネットの最新版、圏外ならキャッシュ
