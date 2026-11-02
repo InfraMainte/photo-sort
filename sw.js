@@ -1,5 +1,5 @@
 // 写真仕分け：オフライン用キャッシュ（更新時は VERSION を上げる。踏査写真アプリとは別名）
-const VERSION = 'photo-sort-v2';
+const VERSION = 'photo-sort-v3';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

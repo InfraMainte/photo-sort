@@ -238,8 +238,15 @@ function addProc(g){
 }
 function renameItem(no){
   const l = loadList(), b = l.find(x=>x.no===no); if(!b) return;
-  const p = split(b.name), v = ask(p.g ? `「${p.g}」の工程名を変更` : '名前を変更', p.s); if(v===null || !v) return;
-  b.name = join(p.g, v); saveList(l); render();
+  const p = split(b.name);
+  if(p.g){   // 調査の中の工程：工程名だけ変える
+    const v = ask(`「${p.g}」の工程名を変更`, p.s); if(v===null || !v) return;
+    b.name = join(p.g, v);
+  }else{     // 調査なしの対象：「調査名／工程名」と入れれば調査にまとめる
+    const v = prompt('名前を変更（「調査名／工程名」と入れると調査ごとにまとめます）', p.s); if(v===null || !v.trim()) return;
+    const q = split(v); b.name = q.g ? join(q.g, q.s) : q.s;
+  }
+  saveList(l); render();
 }
 function renameGroup(g){
   const v = ask('調査名を変更', g); if(v===null || !v || v===g) return;
